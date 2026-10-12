@@ -12,6 +12,7 @@ import pytest
 from anchorsense.models import (
     Anchor,
     DEFAULT_ANCHORS,
+    DEFAULT_TAG_Z,
     RoomGeometry,
     SimulationConfig,
 )
@@ -60,13 +61,15 @@ class TestCanonicalGeometryConsistency:
             )
 
     def test_simulation_config_uses_canonical_defaults(self):
-        """SimulationConfig default room and anchors must match canonical defaults."""
+        """SimulationConfig default room, anchors, and tag height must match canonical defaults."""
         cfg = SimulationConfig()
         assert cfg.room.width == CANONICAL_ROOM["width"]
         assert cfg.room.length == CANONICAL_ROOM["length"]
         assert cfg.room.height == CANONICAL_ROOM["height"]
         assert len(cfg.anchors) == 6
         assert cfg.anchors == DEFAULT_ANCHORS
+        assert cfg.target_z == DEFAULT_TAG_Z
+        assert DEFAULT_TAG_Z == 1.1
 
     def test_cross_check_with_frontend_source_file(self):
         """

@@ -41,6 +41,9 @@ class RoomGeometry:
             raise ValueError("Room dimensions must be positive")
 
 
+# Default tag height matching frontend trajectory generation (1.1m nominal waist level)
+DEFAULT_TAG_Z: float = 1.1
+
 # Default anchor layout — coordinates taken directly from the frontend store.
 DEFAULT_ANCHORS: tuple[Anchor, ...] = (
     Anchor(id="A1", x=0.5,  y=0.5,  z=2.8),
@@ -69,7 +72,7 @@ class SimulationConfig:
     outlier_magnitude: float = 5.0   # metres  max additional positive outlier
     nlos_bias_mean: float = 0.35     # metres  mean of exponential NLOS bias
     nlos_rate: float = 0.10          # probability of NLOS-biased measurement
-    target_z: float = 1.1            # metres  mobile tag height
+    target_z: float = DEFAULT_TAG_Z  # metres  mobile tag height
     seed: int = 42
 
     def __post_init__(self) -> None:
@@ -89,6 +92,8 @@ class SimulationConfig:
             raise ValueError("outlier_magnitude must be non-negative")
         if self.nlos_bias_mean < 0:
             raise ValueError("nlos_bias_mean must be non-negative")
+        if self.target_z < 0:
+            raise ValueError("target_z must be non-negative")
 
 
 # ---------------------------------------------------------------------------

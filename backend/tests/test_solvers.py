@@ -7,6 +7,7 @@ import pytest
 
 from anchorsense.models import (
     Anchor,
+    DEFAULT_TAG_Z,
     EstimateStatus,
     RangeMeasurement,
     RoomGeometry,
@@ -35,12 +36,12 @@ KNOWN_X, KNOWN_Y = 6.0, 4.0
 
 
 def _noise_free_measurements(
-    x: float, y: float, anchors: tuple[Anchor, ...],
+    x: float, y: float, anchors: tuple[Anchor, ...], tag_z: float = DEFAULT_TAG_Z,
 ) -> list[RangeMeasurement]:
-    """Generate perfect measurements from a known position."""
+    """Generate perfect measurements from a known position using 3D Euclidean range."""
     measurements = []
     for a in anchors:
-        true_range = math.sqrt((x - a.x)**2 + (y - a.y)**2)
+        true_range = math.sqrt((x - a.x)**2 + (y - a.y)**2 + (tag_z - a.z)**2)
         measurements.append(RangeMeasurement(
             anchor_id=a.id,
             true_range=true_range,
@@ -51,13 +52,13 @@ def _noise_free_measurements(
 
 def _noisy_measurements(
     x: float, y: float, anchors: tuple[Anchor, ...], noise: float = 0.1,
-    seed: int = 42,
+    seed: int = 42, tag_z: float = DEFAULT_TAG_Z,
 ) -> list[RangeMeasurement]:
-    """Generate measurements with small Gaussian noise."""
+    """Generate measurements with small Gaussian noise using 3D Euclidean range."""
     rng = np.random.default_rng(seed)
     measurements = []
     for a in anchors:
-        true_range = math.sqrt((x - a.x)**2 + (y - a.y)**2)
+        true_range = math.sqrt((x - a.x)**2 + (y - a.y)**2 + (tag_z - a.z)**2)
         measured = true_range + rng.normal(0, noise)
         measurements.append(RangeMeasurement(
             anchor_id=a.id,
@@ -268,4 +269,38 @@ class TestSolveRobustNLS:
             meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, f_scale=-1.0,
         )
         assert res_neg.status == EstimateStatus.INVALID_INPUT
+
+
+class TestRangeGeometry3D:
+    """Targeted regression tests for the 3D range geometry model."""
+
+    def test_noise_free_recovery_with_3d_anchor_heights(self):
+        """Both solvers recover true position with sub-millimetre accuracy using 3D ceiling anchors."""
+        meas = _noise_free_measurements(KNOWN_X, KNOWN_Y, GOOD_ANCHORS, tag_z=DEFAULT_TAG_Z)
+
+        res_nls = solve_nls(meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, tag_z=DEFAULT_TAG_Z)
+        assert res_nls.status == EstimateStatus.VALID
+        err_nls = math.hypot(res_nls.x - KNOWN_X, res_nls.y - KNOWN_Y)
+        assert err_nls < 1e-6, f"NLS error {err_nls} exceeds 1e-6 tolerance"
+
+        res_robust = solve_robust_nls(meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, tag_z=DEFAULT_TAG_Z)
+        assert res_robust.status == EstimateStatus.VALID
+        err_robust = math.hypot(res_robust.x - KNOWN_X, res_robust.y - KNOWN_Y)
+        assert err_robust < 1e-6, f"Robust NLS error {err_robust} exceeds 1e-6 tolerance"
+
+    def test_custom_tag_height_recovers_exact_position(self):
+        """Solvers correctly recover position when tag height is configured to a non-default value."""
+        custom_tag_z = 0.5  # lower device height
+        meas = _noise_free_measurements(KNOWN_X, KNOWN_Y, GOOD_ANCHORS, tag_z=custom_tag_z)
+
+        res_nls = solve_nls(meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, tag_z=custom_tag_z)
+        assert res_nls.status == EstimateStatus.VALID
+        err = math.hypot(res_nls.x - KNOWN_X, res_nls.y - KNOWN_Y)
+        assert err < 1e-6
+
+        res_robust = solve_robust_nls(meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, tag_z=custom_tag_z)
+        assert res_robust.status == EstimateStatus.VALID
+        err_rob = math.hypot(res_robust.x - KNOWN_X, res_robust.y - KNOWN_Y)
+        assert err_rob < 1e-6
+
 

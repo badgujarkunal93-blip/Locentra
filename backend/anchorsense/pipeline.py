@@ -115,6 +115,7 @@ def run_pipeline(
             anchors=config.anchors,
             timestamp=float(timestamps[i]),
             room=config.room,
+            tag_z=config.target_z,
         )
         nls_estimates.append(est)
 
@@ -129,6 +130,7 @@ def run_pipeline(
             anchors=config.anchors,
             timestamp=float(timestamps[i]),
             room=config.room,
+            tag_z=config.target_z,
             loss=robust_loss,
             f_scale=robust_f_scale,
         )
