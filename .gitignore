@@ -34,3 +34,11 @@ vite.config.js
 .env
 .env.local
 .env.*.local
+
+# Python / Pytest cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+
