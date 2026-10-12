@@ -8,7 +8,8 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  RefreshCw
 } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { SectionHeader } from '../../ui/SectionHeader';
@@ -25,6 +26,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
   const setSimulationConfig = useAppStore((s) => s.setSimulationConfig);
   const runBackendSimulation = useAppStore((s) => s.runBackendSimulation);
   const resetToDemoTrajectory = useAppStore((s) => s.resetToDemoTrajectory);
+  const syncBackendConfig = useAppStore((s) => s.syncBackendConfig);
 
   const handleNoiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateScenario({ noiseStdDevMeters: parseFloat(e.target.value) });
@@ -77,6 +79,16 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               disabled={isRunning}
             >
               Reset Defaults
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+              onClick={() => syncBackendConfig()}
+              disabled={isRunning}
+              title="Fetch canonical room & anchor configuration from FastAPI backend"
+            >
+              Sync Engine Config
             </Button>
             {simulationState.dataSource === 'backend' && (
               <Button

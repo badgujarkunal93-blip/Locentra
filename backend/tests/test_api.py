@@ -47,6 +47,30 @@ class TestHealthAndConfigEndpoints:
         assert data["simulation_defaults"]["num_points"] == 80
         assert data["simulation_defaults"]["seed"] == 42
 
+    def test_cors_headers_allowed_origin(self):
+        """Vite local origin receives proper CORS response headers."""
+        res = client.options(
+            "/api/v1/config/default",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert res.status_code == 200
+        assert res.headers.get("access-control-allow-origin") == "http://localhost:5173"
+        assert "access-control-allow-credentials" in res.headers
+
+    def test_cors_headers_unauthorized_origin(self):
+        """Unauthorized external origin does not receive access-control-allow-origin header."""
+        res = client.options(
+            "/api/v1/config/default",
+            headers={
+                "Origin": "http://evil-attacker.example.com",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert res.headers.get("access-control-allow-origin") != "http://evil-attacker.example.com"
+
 
 class TestSimulationRunEndpoint:
     """Tests for POST /api/v1/simulations/run."""

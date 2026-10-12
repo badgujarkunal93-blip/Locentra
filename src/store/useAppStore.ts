@@ -86,9 +86,13 @@ interface AppState {
     lastCompareResponse: SimulationCompareResponse | null;
   };
   runBackendBenchmark: () => Promise<void>;
+  syncBackendConfig: () => Promise<void>;
 }
 
 const initialTrajectory = generateDemonstrationTrajectory(80);
+
+let simRequestSeq = 0;
+let benchRequestSeq = 0;
 
 export const useAppStore = create<AppState>((set, get) => ({
   activeSection: 'command-center',
@@ -212,6 +216,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     })),
 
   runBackendSimulation: async () => {
+    if (get().simulationState.status === 'loading') return;
+    const reqSeq = ++simRequestSeq;
     const { activeScenario, simulationState } = get();
     set((state) => ({
       simulationState: { ...state.simulationState, status: 'loading', error: null, validationErrors: null },
@@ -245,6 +251,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         })),
       });
 
+      if (reqSeq !== simRequestSeq) return; // Discard stale response
+
       const mappedTrajectory = mapSimulationToTrajectoryPoints(response);
       set((state) => ({
         trajectory: mappedTrajectory,
@@ -265,6 +273,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         },
       }));
     } catch (err: unknown) {
+      if (reqSeq !== simRequestSeq) return; // Discard stale response error
       const errorMsg = (err as Error)?.message || 'Positioning simulation failed';
       const validationErrs = (err as { errors?: string[] })?.errors || null;
       set((state) => ({
@@ -300,6 +309,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   runBackendBenchmark: async () => {
+    if (get().benchmarkState.status === 'loading') return;
+    const reqSeq = ++benchRequestSeq;
     const { activeScenario, simulationState } = get();
     set((state) => ({
       benchmarkState: { ...state.benchmarkState, status: 'loading', error: null },
@@ -333,6 +344,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         })),
       });
 
+      if (reqSeq !== benchRequestSeq) return; // Discard stale benchmark response
+
       set((state) => ({
         benchmarkState: {
           ...state.benchmarkState,
@@ -347,11 +360,56 @@ export const useAppStore = create<AppState>((set, get) => ({
         },
       }));
     } catch (err: unknown) {
+      if (reqSeq !== benchRequestSeq) return; // Discard stale benchmark error
       set((state) => ({
         benchmarkState: {
           ...state.benchmarkState,
           status: 'error',
           error: (err as Error)?.message || 'Benchmark comparison failed',
+        },
+      }));
+    }
+  },
+
+  syncBackendConfig: async () => {
+    try {
+      const cfg = await apiClient.fetchDefaultConfig();
+      set((state) => ({
+        engineStatus: 'online',
+        systemHealth: {
+          ...state.systemHealth,
+          engineStatus: 'online',
+          lastHeartbeat: new Date().toLocaleTimeString(),
+        },
+        activeScenario: {
+          ...state.activeScenario,
+          room: {
+            ...state.activeScenario.room,
+            width: cfg.room.width,
+            length: cfg.room.length,
+            height: cfg.room.height,
+          },
+          anchors: cfg.anchors.map((backendA) => {
+            const existing = state.activeScenario.anchors.find((a) => a.id === backendA.id);
+            return {
+              id: backendA.id,
+              name: existing?.name || `Anchor ${backendA.id}`,
+              x: backendA.x,
+              y: backendA.y,
+              z: backendA.z,
+              isActive: backendA.is_active,
+              status: existing?.status || 'healthy',
+              nlosProb: existing?.nlosProb || 0.1,
+            };
+          }),
+        },
+      }));
+    } catch {
+      set((state) => ({
+        engineStatus: 'offline',
+        systemHealth: {
+          ...state.systemHealth,
+          engineStatus: 'offline',
         },
       }));
     }

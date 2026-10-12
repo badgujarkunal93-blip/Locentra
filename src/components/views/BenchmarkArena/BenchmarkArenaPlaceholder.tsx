@@ -45,39 +45,60 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
     { errorMeters: '1.00', Trilateration: 0.98, NLLS: 1.00, EKF: 1.00, HybridML: 1.00 },
   ];
 
-  // If real backend comparison data exists, construct comparative quantile progression
-  const activeCdfData = isBackend && compareData ? [
-    {
-      errorMeters: '0.00',
-      Robust_NLS: 0.0,
-      NLS: 0.0,
-      Robust_NLS_Kalman: 0.0,
-    },
-    {
-      errorMeters: (compareData.solvers['robust_nls_kalman']?.metrics.median_error_m ?? 0.15).toFixed(2),
-      Robust_NLS: 0.40,
-      NLS: 0.35,
-      Robust_NLS_Kalman: 0.50,
-    },
-    {
-      errorMeters: (compareData.solvers['robust_nls']?.metrics.median_error_m ?? 0.22).toFixed(2),
-      Robust_NLS: 0.50,
-      NLS: 0.45,
-      Robust_NLS_Kalman: 0.70,
-    },
-    {
-      errorMeters: (compareData.solvers['robust_nls']?.metrics.p95_error_m ?? 0.45).toFixed(2),
-      Robust_NLS: 0.95,
-      NLS: 0.90,
-      Robust_NLS_Kalman: 0.98,
-    },
-    {
-      errorMeters: (compareData.solvers['nls']?.metrics.p95_error_m ?? 0.60).toFixed(2),
-      Robust_NLS: 0.99,
-      NLS: 0.95,
-      Robust_NLS_Kalman: 1.00,
-    },
-  ] : mockCdfData;
+  // If real backend comparison data exists, construct genuine empirical CDF from actual solver errors
+  const activeCdfData = (isBackend && compareData) ? (() => {
+    const { ground_truth, solvers } = compareData;
+    if (!ground_truth || ground_truth.length === 0 || !solvers) return mockCdfData;
+
+    const errorsBySolver: Record<string, number[]> = {};
+    let maxObservedError = 0.5;
+
+    Object.entries(solvers).forEach(([key, s]) => {
+      const errs: number[] = [];
+      s.estimates.forEach((est, idx) => {
+        const gt = ground_truth[idx];
+        if (est && est.status === 'valid' && est.x !== null && est.y !== null && gt) {
+          const d = Math.hypot(est.x - gt.x, est.y - gt.y);
+          errs.push(d);
+          if (d > maxObservedError) maxObservedError = d;
+        }
+      });
+      errs.sort((a, b) => a - b);
+      errorsBySolver[key] = errs;
+    });
+
+    const ceiling = Math.min(Math.max(maxObservedError, 0.5), 3.0);
+    const steps = 15;
+    const grid: number[] = [0];
+    for (let step = 1; step <= steps; step++) {
+      grid.push(Number(((ceiling * step) / steps).toFixed(2)));
+    }
+
+    return grid.map((thresh) => {
+      const point: Record<string, number | string> = {
+        errorMeters: thresh.toFixed(2),
+      };
+
+      if (errorsBySolver['robust_nls']) {
+        const arr = errorsBySolver['robust_nls'];
+        point.Robust_NLS = arr.length > 0 ? Number((arr.filter(e => e <= thresh).length / arr.length).toFixed(3)) : 0;
+      }
+      if (errorsBySolver['robust_nls_kalman']) {
+        const arr = errorsBySolver['robust_nls_kalman'];
+        point.Robust_NLS_Kalman = arr.length > 0 ? Number((arr.filter(e => e <= thresh).length / arr.length).toFixed(3)) : 0;
+      }
+      if (errorsBySolver['nls']) {
+        const arr = errorsBySolver['nls'];
+        point.NLS = arr.length > 0 ? Number((arr.filter(e => e <= thresh).length / arr.length).toFixed(3)) : 0;
+      }
+      if (errorsBySolver['nls_kalman']) {
+        const arr = errorsBySolver['nls_kalman'];
+        point.NLS_Kalman = arr.length > 0 ? Number((arr.filter(e => e <= thresh).length / arr.length).toFixed(3)) : 0;
+      }
+
+      return point;
+    });
+  })() : mockCdfData;
 
   const effectiveNoise = compareData?.effective_config?.noise_std_dev as number | undefined;
 
@@ -319,9 +340,10 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
               <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
               {isBackend ? (
                 <>
-                  <Line type="monotone" dataKey="Robust_NLS" stroke="#06b6d4" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Robust_NLS_Kalman" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="NLS" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Robust_NLS" name="Robust NLS" stroke="#06b6d4" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Robust_NLS_Kalman" name="Robust NLS + Kalman" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="NLS" name="Standard NLS" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="NLS_Kalman" name="Standard NLS + Kalman" stroke="#a855f7" strokeWidth={2} dot={{ r: 3 }} />
                 </>
               ) : (
                 <>
