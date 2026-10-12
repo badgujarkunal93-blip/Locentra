@@ -16,6 +16,7 @@ import { SectionHeader } from '../../ui/SectionHeader';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../ui/Card';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
+import { getApiBaseUrl } from '../../../lib/apiClient';
 
 export const ScenarioStudioPlaceholder: React.FC = () => {
   const activeScenario = useAppStore((s) => s.activeScenario);
@@ -130,7 +131,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
             <div>
               <strong className="text-rose-300 font-semibold">Backend Simulation Error:</strong> {simulationState.error}
               <p className="text-[11px] text-rose-300/80 mt-0.5">
-                Ensure the FastAPI backend is running at <code className="bg-rose-900/40 px-1 py-0.5 rounded text-rose-200">http://127.0.0.1:8000</code> or check your network.
+                Ensure the FastAPI backend is running at <code className="bg-rose-900/40 px-1 py-0.5 rounded text-rose-200">{getApiBaseUrl()}</code> or check your network.
               </p>
             </div>
           </div>

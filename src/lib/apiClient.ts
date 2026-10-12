@@ -25,10 +25,11 @@ export class ApiError extends Error {
     this.errors = errors;
   }
 }
+export const DEFAULT_PRODUCTION_API_URL = 'https://locentra.onrender.com';
 
 /**
  * Resolves the backend API base URL from Vite environment variables.
- * Falls back to localhost in development if unset.
+ * Falls back to localhost in development, and to the deployed Render backend in production.
  */
 export function getApiBaseUrl(): string {
   const metaEnv = (import.meta as unknown as { env?: Record<string, string | boolean | undefined> }).env;
@@ -36,11 +37,11 @@ export function getApiBaseUrl(): string {
   if (typeof envUrl === 'string' && envUrl.trim() !== '') {
     return envUrl.trim().replace(/\/+$/, '');
   }
-  // Safe development default when VITE_API_BASE_URL is unset
+  // Safe development default when VITE_API_BASE_URL is unset in dev
   if (metaEnv?.DEV) {
     return 'http://127.0.0.1:8000';
   }
-  return '';
+  return DEFAULT_PRODUCTION_API_URL;
 }
 
 const DEFAULT_TIMEOUT_MS = 10000;
