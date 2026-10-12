@@ -166,9 +166,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
   setPlaybackIndex: (index) => set({ playbackIndex: index }),
   stepPlayback: () =>
-    set((state) => ({
-      playbackIndex: (state.playbackIndex + 1) % state.trajectory.length,
-    })),
+    set((state) => {
+      const len = state.trajectory?.length || 0;
+      if (len === 0) return state;
+      return {
+        playbackIndex: (state.playbackIndex + 1) % len,
+      };
+    }),
   resetPlayback: () => set({ playbackIndex: 0 }),
 
   // Visibility Toggles

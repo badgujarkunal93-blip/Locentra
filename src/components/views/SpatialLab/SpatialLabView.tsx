@@ -43,10 +43,6 @@ export const SpatialLabView: React.FC = () => {
   useEffect(() => {
     if (!isPlaying) return;
 
-    // Check prefers-reduced-motion
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) return;
-
     // Interval based on playback speed (default: 120ms per step)
     const intervalMs = Math.max(30, Math.round(120 / playbackSpeed));
     const timer = setInterval(() => {
