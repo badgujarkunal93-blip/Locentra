@@ -105,40 +105,44 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Notice & State Banner */}
-      <div className={`rounded-xl p-3.5 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
+      <div className={`rounded-[24px] p-5 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-white shadow-[0_2px_14px_-2px_rgba(0,0,0,0.04)] ${
         isBackend 
-          ? 'bg-slate-900/90 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-          : 'bg-slate-900/80 border-amber-500/40'
+          ? 'border-[#D9F56F]'
+          : 'border-[#EAEAEA]'
       }`}>
-        <div className="flex items-center gap-2.5">
-          {isBackend ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          ) : (
-            <Info className="w-4 h-4 text-amber-400 shrink-0" />
-          )}
-          <span className="text-slate-300">
+        <div className="flex items-center gap-3">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+            isBackend ? 'bg-[#D9F56F] text-[#171717]' : 'bg-[#DDD6F8] text-[#4C3B9E]'
+          }`}>
+            {isBackend ? (
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+            ) : (
+              <Info className="w-5 h-5 shrink-0" />
+            )}
+          </div>
+          <span className="text-[#555555]">
             {isBackend && compareData ? (
               <>
-                <strong className="text-emerald-300">Live Numerical Benchmark:</strong> Real empirical comparison from FastAPI backend across <span className="font-mono font-bold text-emerald-200">{Object.keys(compareData.solvers).join(', ').toUpperCase()}</span> ({compareData.num_points} synthetic points, σ={effectiveNoise ?? 0.15}m noise).
+                <strong className="text-[#171717] font-bold">Live Numerical Benchmark:</strong> Real empirical comparison from FastAPI backend across <span className="font-mono font-bold text-[#171717]">{Object.keys(compareData.solvers).join(', ').toUpperCase()}</span> ({compareData.num_points} synthetic points, σ={effectiveNoise ?? 0.15}m noise).
               </>
             ) : (
               <>
-                <strong className="text-amber-300">Illustrative Benchmark Results:</strong> The CDF curves and metrics below are UI verification prototypes. Click &ldquo;Run Numerical Benchmark&rdquo; to execute the real Python solvers.
+                <strong className="text-[#171717] font-bold">Illustrative Benchmark Results:</strong> The CDF curves and metrics below are UI verification prototypes. Click &ldquo;Run Numerical Benchmark&rdquo; to execute the real Python solvers.
               </>
             )}
           </span>
         </div>
-        <Badge variant={isBackend ? 'mint' : 'illustrative'} size="sm">
+        <Badge variant={isBackend ? 'lime' : 'illustrative'} size="sm">
           {isBackend ? 'Live Python Suite' : 'Mock Benchmark'}
         </Badge>
       </div>
 
       {benchmarkState.status === 'error' && (
-        <div className="rounded-xl p-3.5 bg-rose-950/40 border border-rose-500/40 flex items-center gap-2.5 text-xs text-rose-200">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+        <div className="rounded-[20px] p-4 bg-rose-50 border border-rose-200 flex items-center gap-2.5 text-xs text-rose-800">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <div>
-            <strong className="text-rose-300 font-semibold">Benchmark Run Failed:</strong> {benchmarkState.error}
-            <span className="text-rose-300/80 ml-1">Showing fallback illustrative model.</span>
+            <strong className="font-bold">Benchmark Run Failed:</strong> {benchmarkState.error}
+            <span className="text-rose-700 ml-1">Showing fallback illustrative model.</span>
           </div>
         </div>
       )}
@@ -149,7 +153,7 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
         title="Benchmark Arena & CDF Error Suite"
         subtitle="Rigorous empirical comparison of raw trilateration / WCL, non-linear least squares (LSQ), and kinematic extended Kalman filtering (EKF)."
         actions={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Tabs
               size="sm"
               options={[
@@ -175,7 +179,7 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
 
       {/* Metric Highlights */}
       {isBackend && compareData ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {Object.entries(compareData.solvers).map(([solverId, res]) => {
             const accentColor = 
               solverId.includes('kalman') ? 'mint' :
@@ -203,7 +207,7 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <MetricCard
             title="Baseline Trilateration"
             value="0.58"
@@ -241,52 +245,52 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
 
       {/* Numerical Comparison Table when Backend Data is Available */}
       {isBackend && compareData && (
-        <Card className="border border-emerald-900/30">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between w-full">
               <div>
                 <CardTitle>
-                  <Cpu className="w-4 h-4 text-emerald-400" />
+                  <Cpu className="w-4 h-4 text-[#171717]" />
                   FastAPI Numerical Engine Comparison Metrics
                 </CardTitle>
                 <CardDescription>
                   Side-by-side empirical performance computed on {compareData.num_points} synthetic points
                 </CardDescription>
               </div>
-              <Badge variant="mint" size="sm">
+              <Badge variant="lime" size="sm">
                 Synthetic Simulation (σ = {effectiveNoise ?? 0.15}m)
               </Badge>
             </div>
           </CardHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800">
+              <thead className="bg-[#F8F8F8] text-[#777777] border-b border-[#EAEAEA]">
                 <tr>
-                  <th className="py-2.5 px-4 font-semibold">Algorithm</th>
-                  <th className="py-2.5 px-4 font-semibold">RMSE (m)</th>
-                  <th className="py-2.5 px-4 font-semibold">Mean Error (m)</th>
-                  <th className="py-2.5 px-4 font-semibold">Median Error (m)</th>
-                  <th className="py-2.5 px-4 font-semibold">P95 Error (m)</th>
-                  <th className="py-2.5 px-4 font-semibold">Valid Rate</th>
-                  <th className="py-2.5 px-4 font-semibold">Valid / Total</th>
+                  <th className="py-3 px-4 font-bold">Algorithm</th>
+                  <th className="py-3 px-4 font-bold">RMSE (m)</th>
+                  <th className="py-3 px-4 font-bold">Mean Error (m)</th>
+                  <th className="py-3 px-4 font-bold">Median Error (m)</th>
+                  <th className="py-3 px-4 font-bold">P95 Error (m)</th>
+                  <th className="py-3 px-4 font-bold">Valid Rate</th>
+                  <th className="py-3 px-4 font-bold">Valid / Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-200">
+              <tbody className="divide-y divide-[#EAEAEA] text-[#171717]">
                 {Object.entries(compareData.solvers).map(([id, res]) => (
-                  <tr key={id} className="hover:bg-slate-900/40">
-                    <td className="py-2.5 px-4 font-bold text-emerald-300">{res.name}</td>
-                    <td className="py-2.5 px-4">{res.metrics.rmse_m !== null ? `${res.metrics.rmse_m.toFixed(3)} m` : 'N/A'}</td>
-                    <td className="py-2.5 px-4">{res.metrics.mean_error_m !== null ? `${res.metrics.mean_error_m.toFixed(3)} m` : 'N/A'}</td>
-                    <td className="py-2.5 px-4">{res.metrics.median_error_m !== null ? `${res.metrics.median_error_m.toFixed(3)} m` : 'N/A'}</td>
-                    <td className="py-2.5 px-4">{res.metrics.p95_error_m !== null ? `${res.metrics.p95_error_m.toFixed(3)} m` : 'N/A'}</td>
-                    <td className="py-2.5 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[11px] ${
-                        res.metrics.valid_estimate_rate >= 0.95 ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/50' : 'bg-amber-950 text-amber-300 border border-amber-800/50'
+                  <tr key={id} className="hover:bg-[#F9F9F9]">
+                    <td className="py-3 px-4 font-bold text-[#171717]">{res.name}</td>
+                    <td className="py-3 px-4 font-bold text-[#171717]">{res.metrics.rmse_m !== null ? `${res.metrics.rmse_m.toFixed(3)} m` : 'N/A'}</td>
+                    <td className="py-3 px-4 text-[#555555]">{res.metrics.mean_error_m !== null ? `${res.metrics.mean_error_m.toFixed(3)} m` : 'N/A'}</td>
+                    <td className="py-3 px-4 text-[#555555]">{res.metrics.median_error_m !== null ? `${res.metrics.median_error_m.toFixed(3)} m` : 'N/A'}</td>
+                    <td className="py-3 px-4 text-[#555555]">{res.metrics.p95_error_m !== null ? `${res.metrics.p95_error_m.toFixed(3)} m` : 'N/A'}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
+                        res.metrics.valid_estimate_rate >= 0.95 ? 'bg-[#D9F56F] text-[#171717]' : 'bg-amber-100 text-amber-800'
                       }`}>
                         {(res.metrics.valid_estimate_rate * 100).toFixed(0)}%
                       </span>
                     </td>
-                    <td className="py-2.5 px-4 text-slate-400">{res.metrics.valid_count} / {res.metrics.total_count}</td>
+                    <td className="py-3 px-4 text-[#777777]">{res.metrics.valid_count} / {res.metrics.total_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -296,70 +300,73 @@ export const BenchmarkArenaPlaceholder: React.FC = () => {
       )}
 
       {/* Main Chart Card */}
-      <Card className="border border-emerald-900/30">
+      <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <CardTitle>
-              <BarChart3 className="w-4 h-4 text-emerald-400" />
+              <BarChart3 className="w-4 h-4 text-[#171717]" />
               Empirical Cumulative Distribution Function (CDF) of Positioning Error
             </CardTitle>
             <CardDescription>
               Fraction of test observations achieving localisation accuracy within specified error thresholds (m).
             </CardDescription>
           </div>
-          <Badge variant={isBackend ? 'mint' : 'cyan'} size="sm">
+          <Badge variant={isBackend ? 'lime' : 'neutral'} size="sm">
             {isBackend && compareData ? `N = ${compareData.num_points} Points (Live)` : 'N = 1,000 Trajectories (Mock)'}
           </Badge>
         </CardHeader>
 
-        {/* Recharts LineChart */}
+        {/* Recharts LineChart in Neo-minimalist Styling */}
         <div className="h-80 w-full pt-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={activeCdfData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#162e26" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
               <XAxis 
                 dataKey="errorMeters" 
-                stroke="#64748b" 
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                stroke="#C0C0C0" 
+                tick={{ fill: '#777777', fontSize: 11 }}
                 unit=" m"
               />
               <YAxis 
-                stroke="#64748b" 
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                stroke="#C0C0C0" 
+                tick={{ fill: '#777777', fontSize: 11 }}
                 domain={[0, 1]}
                 tickFormatter={(val) => `${(val * 100).toFixed(0)}%`}
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#091113', 
-                  borderColor: '#1f483c',
-                  borderRadius: '0.75rem',
-                  fontSize: '12px' 
+                  backgroundColor: '#FFFFFF', 
+                  borderColor: '#EAEAEA',
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                  fontSize: '12px',
+                  color: '#171717',
+                  fontWeight: '600',
                 }} 
               />
               <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
               {isBackend ? (
                 <>
-                  <Line type="monotone" dataKey="Robust_NLS" name="Robust NLS" stroke="#06b6d4" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Robust_NLS_Kalman" name="Robust NLS + Kalman" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="NLS" name="Standard NLS" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="NLS_Kalman" name="Standard NLS + Kalman" stroke="#a855f7" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Robust_NLS" name="Robust NLS" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Robust_NLS_Kalman" name="Robust NLS + Kalman" stroke="#171717" strokeWidth={3} dot={{ r: 3.5, fill: '#D9F56F' }} />
+                  <Line type="monotone" dataKey="NLS" name="Standard NLS" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="NLS_Kalman" name="Standard NLS + Kalman" stroke="#B6A9EF" strokeWidth={2.5} dot={{ r: 3 }} />
                 </>
               ) : (
                 <>
-                  <Line type="monotone" dataKey="Trilateration" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="NLLS" stroke="#06b6d4" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="EKF" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="HybridML" stroke="#a78bfa" strokeWidth={2.5} dot={{ r: 3 }} strokeDasharray="4 2" />
+                  <Line type="monotone" dataKey="Trilateration" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="NLLS" stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="EKF" stroke="#171717" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="HybridML" stroke="#B6A9EF" strokeWidth={3} dot={{ r: 4, fill: '#DDD6F8' }} strokeDasharray="4 2" />
                 </>
               )}
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-800/70 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+        <div className="mt-4 pt-4 border-t border-[#F0F0F0] flex flex-col sm:flex-row items-center justify-between text-xs text-[#777777] gap-2">
           <span>Steeper CDF slope represents tighter error bounds and superior positioning reliability.</span>
-          <span className="font-mono text-emerald-400">
+          <span className="font-mono text-[#171717] font-bold">
             {isBackend ? 'FastAPI Numerical Engine' : 'UI Verification Prototype'}
           </span>
         </div>

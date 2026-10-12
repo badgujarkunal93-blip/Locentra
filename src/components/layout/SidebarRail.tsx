@@ -8,13 +8,13 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Activity,
-  Radio,
   Cpu
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppStore } from '../../store/useAppStore';
 import { NavigationItem } from '../../types/navigation';
 import { StatusIndicator } from '../ui/StatusIndicator';
+import { LocentraLogo } from '../ui/LocentraLogo';
 
 const NAV_ITEMS: NavigationItem[] = [
   {
@@ -29,7 +29,6 @@ const NAV_ITEMS: NavigationItem[] = [
     id: 'spatial-lab',
     label: 'Spatial Lab',
     iconName: 'Layers3',
-    badge: 'PHASE 2',
     description: 'Interactive 2D & 3D room, anchors & target trajectories',
     phaseIntroduced: 2,
   },
@@ -37,7 +36,6 @@ const NAV_ITEMS: NavigationItem[] = [
     id: 'scenario-studio',
     label: 'Scenario Studio',
     iconName: 'SlidersHorizontal',
-    badge: 'PHASE 3',
     description: 'Measurement noise, NLOS bias & obstacle occlusion controls',
     phaseIntroduced: 3,
   },
@@ -45,7 +43,6 @@ const NAV_ITEMS: NavigationItem[] = [
     id: 'benchmark-arena',
     label: 'Benchmark Arena',
     iconName: 'BarChart3',
-    badge: 'PHASE 4',
     description: 'Algorithm comparisons, error CDFs & ML residuals',
     phaseIntroduced: 4,
   },
@@ -53,7 +50,6 @@ const NAV_ITEMS: NavigationItem[] = [
     id: 'dataset-explorer',
     label: 'Dataset Explorer',
     iconName: 'Database',
-    badge: 'PHASE 4',
     description: 'Synthetic trajectories, raw ranges & evaluation splits',
     phaseIntroduced: 4,
   },
@@ -67,7 +63,12 @@ export const SidebarRail: React.FC = () => {
   const activeScenario = useAppStore((s) => s.activeScenario);
 
   const getIcon = (name: string, active: boolean) => {
-    const props = { className: cn('w-5 h-5 shrink-0 transition-colors', active ? 'text-emerald-300' : 'text-slate-400 group-hover:text-emerald-400') };
+    const props = { 
+      className: cn(
+        'w-5 h-5 shrink-0 transition-colors', 
+        active ? 'text-[#171717]' : 'text-[#888888] group-hover:text-white'
+      ) 
+    };
     switch (name) {
       case 'Radar': return <Radar {...props} />;
       case 'Layers3': return <Layers3 {...props} />;
@@ -81,22 +82,21 @@ export const SidebarRail: React.FC = () => {
   return (
     <aside
       className={cn(
-        'relative z-30 flex flex-col h-screen border-r border-emerald-950/60 bg-[#091113]/95 backdrop-blur-xl transition-all duration-300 ease-in-out select-none',
-        isCollapsed ? 'w-18' : 'w-64 lg:w-72'
+        'relative z-30 flex flex-col h-full bg-[#232124] text-white transition-all duration-300 ease-in-out select-none',
+        'rounded-[28px] m-3 shadow-[0_4px_24px_rgba(0,0,0,0.14)] border border-[#333134]',
+        isCollapsed ? 'w-20' : 'w-64 lg:w-72'
       )}
     >
       {/* Brand Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-emerald-950/60">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.35)] shrink-0">
-            <Radio className="w-5 h-5 text-slate-950" />
-          </div>
+      <div className="flex items-center justify-between h-20 px-5 border-b border-white/10">
+        <div className="flex items-center gap-3.5 overflow-hidden">
+          <LocentraLogo size={40} variant="badge" />
           {!isCollapsed && (
             <div className="min-w-0">
-              <span className="font-bold text-sm tracking-tight text-slate-100 flex items-center gap-1.5">
-                AnchorSense <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">AI</span>
+              <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
+                Locentra
               </span>
-              <p className="text-[11px] font-mono text-emerald-400/70 truncate">
+              <p className="text-[11px] font-medium text-[#888888] truncate mt-0.5">
                 Spatial Intelligence
               </p>
             </div>
@@ -105,7 +105,7 @@ export const SidebarRail: React.FC = () => {
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors"
+          className="hidden md:flex p-1.5 rounded-full text-[#888888] hover:text-white hover:bg-white/10 transition-colors"
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -114,9 +114,9 @@ export const SidebarRail: React.FC = () => {
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto" aria-label="Main Navigation">
+      <nav className="flex-1 px-3.5 py-5 space-y-2 overflow-y-auto" aria-label="Main Navigation">
         {!isCollapsed && (
-          <div className="px-3 pb-2 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+          <div className="px-3 pb-2 text-[10px] font-mono uppercase tracking-wider text-[#777777] font-bold">
             Platform Modules
           </div>
         )}
@@ -128,42 +128,29 @@ export const SidebarRail: React.FC = () => {
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group relative cursor-pointer',
+                'w-full flex items-center gap-3.5 px-3.5 py-3 rounded-full text-left transition-all duration-150 group relative cursor-pointer',
                 isActive
-                  ? 'bg-gradient-to-r from-emerald-950/80 to-emerald-900/30 text-slate-100 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.12)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                  ? 'bg-white text-[#171717] font-bold shadow-md'
+                  : 'text-[#999999] hover:text-white hover:bg-white/10'
               )}
               title={isCollapsed ? item.label : undefined}
             >
-              {/* Active side indicator */}
-              {isActive && (
-                <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-              )}
-
               {getIcon(item.iconName, isActive)}
 
               {!isCollapsed && (
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">
-                    <span className={cn('text-xs font-semibold truncate', isActive ? 'text-slate-100' : 'text-slate-300')}>
+                    <span className={cn('text-xs truncate', isActive ? 'text-[#171717] font-bold' : 'text-[#CCCCCC] font-medium')}>
                       {item.label}
                     </span>
-                    {item.badge && (
-                      <span
-                        className={cn(
-                          'text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold',
-                          item.badge === 'LIVE'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-slate-800 text-slate-400'
-                        )}
-                      >
+                    {isActive ? (
+                      <span className="w-2 h-2 rounded-full bg-[#D9F56F] shrink-0" />
+                    ) : item.badge && !item.badge.toLowerCase().includes('phase') ? (
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-full font-bold bg-[#D9F56F]/20 text-[#D9F56F] border border-[#D9F56F]/40">
                         {item.badge}
                       </span>
-                    )}
+                    ) : null}
                   </div>
-                  <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                    {item.description}
-                  </p>
                 </div>
               )}
             </button>
@@ -172,21 +159,21 @@ export const SidebarRail: React.FC = () => {
       </nav>
 
       {/* Engine & Environment Telemetry Pod */}
-      <div className="p-3 border-t border-emerald-950/60 bg-[#060c0e]">
+      <div className="p-3.5 border-t border-white/10">
         {!isCollapsed ? (
-          <div className="rounded-xl p-3 bg-slate-950/60 border border-emerald-900/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-emerald-400" /> Engine Link
+          <div className="rounded-[20px] p-4 bg-[#2D2A2E] border border-white/10 shadow-inner">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#999999] flex items-center gap-1.5 font-bold">
+                <Cpu className="w-3.5 h-3.5 text-[#D9F56F]" /> Engine Link
               </span>
               <StatusIndicator status={engineStatus} />
             </div>
-            <div className="text-[11px] text-slate-300 font-mono truncate">
+            <div className="text-xs text-white font-semibold truncate">
               {activeScenario.name}
             </div>
-            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mt-1.5 pt-1.5 border-t border-slate-800/80">
-              <span>{activeScenario.anchors.length} Anchors active</span>
-              <span className="text-emerald-400">20.0 Hz</span>
+            <div className="flex items-center justify-between text-[11px] font-mono text-[#888888] mt-2 pt-2 border-t border-white/10">
+              <span>{activeScenario.anchors.length} Anchors</span>
+              <span className="text-[#D9F56F] font-bold">20.0 Hz</span>
             </div>
           </div>
         ) : (

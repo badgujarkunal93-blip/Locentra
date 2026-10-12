@@ -1,110 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Grid3X3, 
-  Maximize2, 
   Play, 
-  Clock, 
-  Compass
+  Search,
+  Bell
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
+import { LocentraLogo } from '../ui/LocentraLogo';
 
 export const TopStatusBar: React.FC = () => {
   const activeSection = useAppStore((s) => s.activeSection);
-  const showTechnicalGrid = useAppStore((s) => s.showTechnicalGrid);
-  const toggleTechnicalGrid = useAppStore((s) => s.toggleTechnicalGrid);
-  const isCompactMode = useAppStore((s) => s.isCompactMode);
-  const toggleCompactMode = useAppStore((s) => s.toggleCompactMode);
   const setQuickRunModalOpen = useAppStore((s) => s.setQuickRunModalOpen);
   const activeScenario = useAppStore((s) => s.activeScenario);
-  
-  const [timeString, setTimeString] = useState('');
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeString(now.toLocaleTimeString() + ' UTC');
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const sectionTitles: Record<string, string> = {
-    'command-center': 'Mission Control & System Diagnostics',
+    'command-center': 'Command Center',
     'spatial-lab': 'Spatial Simulation Environment',
     'scenario-studio': 'Degradation & Obstacle Configurator',
     'benchmark-arena': 'Multi-Algorithm Evaluation Bench',
     'dataset-explorer': 'Synthetic Trajectory & Range Vault',
   };
 
+  const simulationState = useAppStore((s) => s.simulationState);
+  const engineStatus = useAppStore((s) => s.engineStatus);
+  const isEngineLive = simulationState.dataSource === 'backend' || engineStatus === 'online';
+
   return (
-    <header className="h-16 border-b border-emerald-950/60 bg-[#081013]/90 backdrop-blur-xl px-4 lg:px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
-      {/* Left: Active Section & Breadcrumbs */}
+    <header className="h-20 bg-transparent px-4 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20">
+      {/* Left: Brand / Module Breadcrumb */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-emerald-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
-            <Compass className="w-3.5 h-3.5 text-emerald-400" />
-            AnchorSense
+          <span className="text-xs font-mono uppercase tracking-wider font-bold text-[#171717] flex items-center gap-1.5 shrink-0">
+            <LocentraLogo size={16} variant="icon" className="text-[#171717]" />
+            Locentra
           </span>
-          <span className="text-slate-600 font-mono text-xs">/</span>
-          <span className="text-xs font-semibold text-slate-200 truncate">
+          <span className="text-[#A0A0A0] font-mono text-xs">/</span>
+          <span className="text-sm font-bold text-[#171717] truncate">
             {sectionTitles[activeSection] || 'Platform'}
           </span>
         </div>
 
-        <Badge variant="mint" size="sm" className="hidden sm:inline-flex">
+        <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#DDD6F8] text-[#4C3B9E]">
           v0.1.0-alpha
-        </Badge>
+        </span>
       </div>
 
-      {/* Middle: Live Telemetry Bar */}
-      <div className="hidden xl:flex items-center gap-4 px-3 py-1.5 rounded-lg bg-slate-950/70 border border-emerald-950/70 font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400">Environment:</span>
-          <span className="text-slate-200 font-medium truncate max-w-[160px]">{activeScenario.name}</span>
-        </div>
-        <div className="h-3 w-px bg-slate-800" />
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400">Stream:</span>
-          <span className="text-emerald-400 font-semibold">20.0 Hz</span>
-        </div>
-        <div className="h-3 w-px bg-slate-800" />
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <Clock className="w-3 h-3 text-cyan-400" />
-          <span>{timeString}</span>
+      {/* Middle: Rounded Pill Search Input */}
+      <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+        <div className="w-full relative">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#888888]" />
+          <input
+            type="text"
+            placeholder="Search telemetry, anchors, solvers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-[#EAEAEA] text-xs font-medium text-[#171717] placeholder-[#888888] focus:outline-none focus:border-[#D9F56F] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all"
+          />
         </div>
       </div>
 
-      {/* Right Actions & Tool toggles */}
-      <div className="flex items-center gap-2.5 shrink-0">
+      {/* Right Actions & Utilities */}
+      <div className="flex items-center gap-3 shrink-0">
+        {/* Testbed / Engine Status Pill */}
+        <div className="hidden lg:flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-white border border-[#EAEAEA] text-xs font-medium shadow-xs">
+          <div className="flex items-center gap-1.5 text-[#555555]">
+            <span className="text-[#888888]">Testbed:</span>
+            <span className="font-bold text-[#171717] truncate max-w-[130px]">
+              {activeScenario.room.width}m × {activeScenario.room.length}m
+            </span>
+          </div>
+          <div className="h-3 w-px bg-[#EAEAEA]" />
+          <div className="flex items-center gap-1.5 font-bold">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isEngineLive
+                  ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                  : 'bg-amber-400'
+              }`}
+            />
+            <span className={isEngineLive ? 'text-emerald-700' : 'text-amber-700'}>
+              {isEngineLive ? 'FastAPI Live' : 'Standby'}
+            </span>
+          </div>
+        </div>
+
+        {/* Notification Icon */}
         <button
-          onClick={toggleTechnicalGrid}
-          className={`p-2 rounded-lg border transition-colors ${
-            showTechnicalGrid 
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' 
-              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-          title="Toggle Technical Background Grid"
-          aria-label="Toggle Technical Grid"
+          className="w-10 h-10 rounded-full bg-white border border-[#EAEAEA] flex items-center justify-center text-[#555555] hover:text-[#171717] hover:bg-[#F9F9F9] transition-colors relative shadow-xs"
+          title="Notifications"
+          aria-label="Notifications"
         >
-          <Grid3X3 className="w-4 h-4" />
+          <Bell className="w-4 h-4" />
+          <span className="w-2 h-2 rounded-full bg-[#D9F56F] absolute top-2 right-2 border border-white" />
         </button>
 
-        <button
-          onClick={toggleCompactMode}
-          className={`p-2 rounded-lg border transition-colors ${
-            isCompactMode 
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' 
-              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-          title="Toggle Compact Data Density"
-          aria-label="Toggle Compact Data Density"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
-
+        {/* Primary Diagnostic Action Button */}
         <Button
           size="sm"
           variant="primary"

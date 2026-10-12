@@ -22,29 +22,35 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-emerald-950/60 mb-6',
+        'flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 mb-6',
         className
       )}
     >
       <div>
-        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           {categoryTag && (
-            <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#777777] font-bold">
               {categoryTag}
             </span>
           )}
-          {categoryTag && phaseBadge && <span className="text-slate-600 font-mono">/</span>}
+          {categoryTag && phaseBadge && !phaseBadge.toLowerCase().includes('phase') && (
+            <span className="text-[#C4C4C4] font-mono">/</span>
+          )}
           {phaseBadge && (
-            <Badge variant="cyan" size="sm">
-              {phaseBadge}
-            </Badge>
+            phaseBadge.toLowerCase().includes('phase') ? (
+              <span className="sr-only">{phaseBadge}</span>
+            ) : (
+              <Badge variant="lime" size="sm">
+                {phaseBadge}
+              </Badge>
+            )
           )}
         </div>
-        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-100">
+        <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-[#171717]">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1 text-sm text-slate-400 max-w-3xl leading-relaxed">
+          <p className="mt-1.5 text-sm text-[#777777] max-w-3xl leading-relaxed">
             {subtitle}
           </p>
         )}

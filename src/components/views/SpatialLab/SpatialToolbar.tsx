@@ -41,9 +41,9 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
   const speedOptions = [0.5, 1.0, 2.0];
 
   return (
-    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-xl bg-[#091114]/90 border border-emerald-950/80 backdrop-blur-md">
+    <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 p-3 px-4 rounded-[18px] bg-white border border-[#EAEAEA] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.03)]">
       {/* Left: View Mode Segmented Switch & Layer Toggles */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2.5 flex-wrap">
         <Tabs<SpatialViewMode>
           size="sm"
           options={[
@@ -54,16 +54,16 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
           onChange={setSpatialViewMode}
         />
 
-        <div className="h-4 w-px bg-slate-800 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-[#EAEAEA] mx-0.5 hidden sm:block" />
 
         {/* Visibility Toggles */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={toggleGroundTruth}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium border transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border transition-all cursor-pointer ${
               showGroundTruth
-                ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
-                : 'bg-slate-900/60 text-slate-500 border-slate-800'
+                ? 'bg-[#E0F2FE] text-[#0369A1] border-[#BAE6FD]'
+                : 'bg-[#F8F9FA] text-[#888888] border-[#EAEAEA]'
             }`}
             title="Toggle Ground Truth Path (Cyan)"
           >
@@ -72,22 +72,22 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
 
           <button
             onClick={toggleEstimated}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium border transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border transition-all cursor-pointer ${
               showEstimated
-                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
-                : 'bg-slate-900/60 text-slate-500 border-slate-800'
+                ? 'bg-[#D9F56F] text-[#171717] border-[#D9F56F]'
+                : 'bg-[#F8F9FA] text-[#888888] border-[#EAEAEA]'
             }`}
-            title="Toggle Estimated Path (Mint)"
+            title="Toggle Estimated Path (Lime)"
           >
             Est Path
           </button>
 
           <button
             onClick={toggleRangeRays}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium border transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border transition-all cursor-pointer ${
               showRangeRays
-                ? 'bg-amber-950/80 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
-                : 'bg-slate-900/60 text-slate-500 border-slate-800'
+                ? 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]'
+                : 'bg-[#F8F9FA] text-[#888888] border-[#EAEAEA]'
             }`}
             title="Toggle Range Measurement Rays"
           >
@@ -96,10 +96,10 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
 
           <button
             onClick={toggleAnchorLabels}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium border transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold border transition-all cursor-pointer ${
               showAnchorLabels
-                ? 'bg-slate-800/80 text-slate-200 border-slate-600/50'
-                : 'bg-slate-900/60 text-slate-500 border-slate-800'
+                ? 'bg-[#232124] text-white border-[#232124]'
+                : 'bg-[#F8F9FA] text-[#888888] border-[#EAEAEA]'
             }`}
             title="Toggle Anchor Labels"
           >
@@ -109,7 +109,7 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
       </div>
 
       {/* Right: Playback Controls & Scrubber */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
         {/* Play/Pause/Step/Reset */}
         <div className="flex items-center gap-1.5">
           <Button
@@ -119,7 +119,7 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
             title="Reset to origin"
             aria-label="Reset trajectory playback"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3 h-3" />
           </Button>
 
           <Button
@@ -128,8 +128,9 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
             onClick={() => setIsPlaying(!isPlaying)}
             title={isPlaying ? 'Pause' : 'Play'}
             aria-label={isPlaying ? 'Pause trajectory playback' : 'Play trajectory playback'}
+            className={!isPlaying ? 'bg-[#D9F56F] text-[#171717] border-[#D9F56F] hover:bg-[#CEEA62]' : ''}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+            {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
           </Button>
 
           <Button
@@ -140,20 +141,20 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
             title="Step forward 1 frame"
             aria-label="Step forward 1 frame"
           >
-            <FastForward className="w-3.5 h-3.5" />
+            <FastForward className="w-3 h-3" />
           </Button>
         </div>
 
         {/* Speed Selector */}
-        <div className="flex items-center rounded-lg bg-slate-950 p-0.5 border border-slate-800/80 font-mono text-[10px]">
+        <div className="flex items-center rounded-full bg-[#F3F4F6] p-0.5 border border-[#E5E7EB] font-mono text-[10px]">
           {speedOptions.map((speed) => (
             <button
               key={speed}
               onClick={() => setPlaybackSpeed(speed)}
-              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer font-bold ${
                 playbackSpeed === speed
-                  ? 'bg-emerald-500/20 text-emerald-300 font-bold'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#171717] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#171717]'
               }`}
             >
               {speed}x
@@ -169,10 +170,10 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
             max={trajectory.length - 1}
             value={playbackIndex}
             onChange={(e) => setPlaybackIndex(parseInt(e.target.value, 10))}
-            className="w-24 sm:w-32 accent-emerald-400 bg-slate-800 h-1.5 rounded cursor-pointer"
+            className="w-20 sm:w-28 accent-[#171717] bg-[#E5E7EB] h-1.5 rounded-full cursor-pointer"
             title={`Frame ${playbackIndex + 1} / ${trajectory.length}`}
           />
-          <span className="font-mono text-[10px] text-slate-400 whitespace-nowrap min-w-[45px]">
+          <span className="font-mono text-[10px] text-[#64748B] font-bold whitespace-nowrap min-w-[42px]">
             {playbackIndex + 1}/{trajectory.length}
           </span>
         </div>
@@ -186,7 +187,7 @@ export const SpatialToolbar: React.FC<SpatialToolbarProps> = ({ onResetView }) =
             title="Reset View / Camera"
             aria-label="Reset View or Camera"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
+            <Maximize2 className="w-3 h-3" />
           </Button>
         )}
       </div>

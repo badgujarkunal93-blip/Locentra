@@ -10,7 +10,6 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
-  const showTechnicalGrid = useAppStore((s) => s.showTechnicalGrid);
   const isCompactMode = useAppStore((s) => s.isCompactMode);
   const isQuickRunModalOpen = useAppStore((s) => s.isQuickRunModalOpen);
   const setQuickRunModalOpen = useAppStore((s) => s.setQuickRunModalOpen);
@@ -26,7 +25,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#070c0e] text-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#E6E6E6] text-[#171717]">
       {/* Left Navigation Rail */}
       <SidebarRail />
 
@@ -35,17 +34,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         {/* Top Status Bar */}
         <TopStatusBar />
 
-        {/* Scrollable View Area with optional Technical Grid */}
+        {/* Scrollable View Area */}
         <main
           className={`flex-1 overflow-y-auto relative ${
-            showTechnicalGrid ? 'bg-tech-grid' : ''
-          } ${isCompactMode ? 'p-3 lg:p-4' : 'p-4 lg:p-8'}`}
+            isCompactMode ? 'p-3 lg:p-4' : 'p-4 lg:p-8'
+          }`}
         >
-          {/* Subtle radial glow background behind content */}
-          <div className="absolute inset-0 bg-tech-radial-glow pointer-events-none" />
-
           {/* View Container */}
-          <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="relative z-10 max-w-7xl mx-auto pb-12">
             {children}
           </div>
         </main>
@@ -53,51 +49,51 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       {/* Quick Diagnostic / Scenario Modal */}
       {isQuickRunModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="tech-card rounded-2xl w-full max-w-lg border border-emerald-500/40 p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-[26px] w-full max-w-lg border border-[#EAEAEA] p-7 shadow-2xl relative">
             <button
               onClick={() => setQuickRunModalOpen(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full text-[#888888] hover:text-[#171717] hover:bg-[#F5F5F5] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="flex items-center gap-3.5 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-[#D9F56F] flex items-center justify-center text-[#171717]">
                 <Play className="w-5 h-5 fill-current" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-slate-100">Execute Engine Diagnostic Run</h3>
-                <p className="text-xs text-slate-400 font-mono">Environment: lab-warehouse-alpha</p>
+                <h3 className="text-lg font-bold text-[#171717]">Execute Engine Diagnostic Run</h3>
+                <p className="text-xs text-[#777777] font-mono">Environment: lab-warehouse-alpha</p>
               </div>
             </div>
 
-            <div className="space-y-3.5 my-5 text-xs text-slate-300">
-              <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 space-y-2">
+            <div className="space-y-3.5 my-5 text-xs text-[#555555]">
+              <div className="p-4 rounded-[18px] bg-[#F7F7F7] border border-[#EAEAEA] space-y-2.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Solver Pipeline:</span>
-                  <span className="font-mono text-emerald-300 font-medium">EKF + NLLS Refinement</span>
+                  <span className="text-[#777777]">Solver Pipeline:</span>
+                  <span className="font-mono text-[#171717] font-bold">EKF + NLLS Refinement</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Active Transceivers:</span>
-                  <span className="font-mono text-slate-200">6 Anchors (UWB / 4.49 GHz)</span>
+                  <span className="text-[#777777]">Active Transceivers:</span>
+                  <span className="font-mono text-[#171717]">6 Anchors (UWB / 4.49 GHz)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Degradation Profile:</span>
-                  <span className="font-mono text-amber-300">σ = 0.15m (15% NLOS bias)</span>
+                  <span className="text-[#777777]">Degradation Profile:</span>
+                  <span className="font-mono text-amber-700 font-semibold">σ = 0.15m (15% NLOS bias)</span>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-emerald-950/20 border border-emerald-900/30 text-emerald-300">
-                <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-                <p className="text-[11px] leading-relaxed">
-                  Phase 1 Preview Mode: Initiating this diagnostic will exercise frontend status state transitions. The real numerical solver pipeline will execute via Python in Phase 3.
+              <div className="flex items-start gap-2.5 p-3.5 rounded-[18px] bg-[#F5F2FE] border border-[#DDD6F8] text-[#4C3B9E]">
+                <ShieldCheck className="w-4 h-4 shrink-0 text-[#B6A9EF] mt-0.5" />
+                <p className="text-xs leading-relaxed">
+                  Diagnostic Preview Mode: Initiating this diagnostic will exercise frontend status state transitions with the active positioning solver pipeline.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
-              <Button variant="ghost" size="sm" onClick={() => setQuickRunModalOpen(false)}>
+              <Button variant="secondary" size="sm" onClick={() => setQuickRunModalOpen(false)}>
                 Cancel
               </Button>
               <Button

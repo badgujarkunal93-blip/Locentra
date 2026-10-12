@@ -60,24 +60,24 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full bg-[#050b0e] rounded-xl overflow-hidden border border-emerald-950/60 select-none ${className || ''}`}
+      className={`relative w-full h-full bg-[#070D10] rounded-2xl overflow-hidden select-none ${className || ''}`}
     >
       <svg
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         className="w-full h-full"
-        style={{ minHeight: '440px' }}
+        style={{ minHeight: '320px' }}
       >
         <defs>
           {/* Subtle Glow Filter */}
           <filter id="anchor-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
           <filter id="target-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -91,11 +91,10 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
           y={margin.top}
           width={plotWidth}
           height={plotHeight}
-          fill="#081014"
-          stroke="#10b981"
+          fill="#070D10"
+          stroke="#16393E"
           strokeWidth="1.5"
-          strokeOpacity="0.4"
-          rx="6"
+          rx="8"
         />
 
         {/* Metre Grid Lines: Vertical */}
@@ -109,20 +108,21 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                 y1={margin.top}
                 x2={svgX}
                 y2={margin.top + plotHeight}
-                stroke="#104033"
+                stroke={isMajor ? '#193C45' : '#10272E'}
                 strokeWidth={isMajor ? 1 : 0.5}
-                strokeOpacity={isMajor ? 0.35 : 0.15}
-                strokeDasharray={isMajor ? undefined : '2,2'}
+                strokeOpacity={isMajor ? 0.75 : 0.45}
+                strokeDasharray={isMajor ? undefined : '2,3'}
               />
               {/* X Axis Label */}
               {isMajor && (
                 <text
                   x={svgX}
-                  y={margin.top + plotHeight + 20}
-                  fill="#64748b"
+                  y={margin.top + plotHeight + 18}
+                  fill="#64748B"
                   fontSize="10"
-                  fontFamily="JetBrains Mono"
+                  fontFamily="JetBrains Mono, monospace"
                   textAnchor="middle"
+                  fontWeight="500"
                 >
                   {x.toFixed(0)}m
                 </text>
@@ -142,10 +142,10 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                 y1={svgY}
                 x2={margin.left + plotWidth}
                 y2={svgY}
-                stroke="#104033"
+                stroke={isMajor ? '#193C45' : '#10272E'}
                 strokeWidth={isMajor ? 1 : 0.5}
-                strokeOpacity={isMajor ? 0.35 : 0.15}
-                strokeDasharray={isMajor ? undefined : '2,2'}
+                strokeOpacity={isMajor ? 0.75 : 0.45}
+                strokeDasharray={isMajor ? undefined : '2,3'}
               />
               {/* Y Axis Label */}
               {isMajor && (
@@ -195,9 +195,9 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
           <polyline
             points={gtPathPoints}
             fill="none"
-            stroke="#06b6d4"
+            stroke="#06B6D4"
             strokeWidth="1.5"
-            strokeOpacity="0.2"
+            strokeOpacity="0.25"
           />
         )}
 
@@ -205,9 +205,9 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
           <polyline
             points={estPathPoints}
             fill="none"
-            stroke="#10b981"
+            stroke="#D9F56F"
             strokeWidth="1.5"
-            strokeOpacity="0.25"
+            strokeOpacity="0.3"
             strokeDasharray="4,3"
           />
         )}
@@ -217,11 +217,11 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
           <polyline
             points={traveledGtPoints}
             fill="none"
-            stroke="#22d3ee"
+            stroke="#22D3EE"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.9"
+            opacity="0.95"
           />
         )}
 
@@ -245,30 +245,31 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                     y1={ay}
                     x2={tx}
                     y2={ty}
-                    stroke="#f59e0b"
+                    stroke="#F59E0B"
                     strokeWidth="1.25"
                     strokeDasharray="4,3"
-                    strokeOpacity="0.5"
+                    strokeOpacity="0.55"
                   />
                   {/* Distance badge on ray */}
                   <rect
-                    x={midX - 16}
-                    y={midY - 8}
-                    width="32"
-                    height="16"
-                    fill="#0a1215"
-                    rx="3"
-                    stroke="#f59e0b"
-                    strokeWidth="0.5"
-                    strokeOpacity="0.6"
+                    x={midX - 18}
+                    y={midY - 9}
+                    width="36"
+                    height="18"
+                    fill="#070D10"
+                    rx="4"
+                    stroke="#F59E0B"
+                    strokeWidth="0.75"
+                    strokeOpacity="0.7"
                   />
                   <text
                     x={midX}
                     y={midY + 3.5}
-                    fill="#fbbf24"
-                    fontSize="9"
-                    fontFamily="JetBrains Mono"
+                    fill="#FDE68A"
+                    fontSize="9.5"
+                    fontFamily="JetBrains Mono, monospace"
                     textAnchor="middle"
+                    fontWeight="600"
                   >
                     {dist.toFixed(1)}m
                   </text>
@@ -283,14 +284,14 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
             y1={toSvgY(currentPoint.y)}
             x2={toSvgX(currentPoint.estimatedX)}
             y2={toSvgY(currentPoint.estimatedY)}
-            stroke="#f43f5e"
+            stroke="#F43F5E"
             strokeWidth="1.5"
-            strokeDasharray="2,2"
-            opacity="0.9"
+            strokeDasharray="3,2"
+            opacity="0.95"
           />
         )}
 
-        {/* Estimated Target Position Marker (Mint Diamond or Amber if degraded) */}
+        {/* Estimated Target Position Marker (Lime Diamond or Amber if degraded) */}
         {showEstimated && currentPoint && (
           <g transform={`translate(${toSvgX(currentPoint.estimatedX)}, ${toSvgY(currentPoint.estimatedY)})`}>
             <rect
@@ -298,8 +299,8 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
               y="-6"
               width="12"
               height="12"
-              fill={currentPoint.isDegraded ? "#f59e0b" : "#10b981"}
-              stroke={currentPoint.isDegraded ? "#fbbf24" : "#34d399"}
+              fill={currentPoint.isDegraded ? "#F59E0B" : "#D9F56F"}
+              stroke={currentPoint.isDegraded ? "#FDE68A" : "#171717"}
               strokeWidth="1.5"
               strokeDasharray={currentPoint.isDegraded ? "2,2" : undefined}
               transform="rotate(45)"
@@ -310,7 +311,7 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
               y="-2"
               width="4"
               height="4"
-              fill={currentPoint.isDegraded ? "#451a03" : "#062e24"}
+              fill={currentPoint.isDegraded ? "#78350F" : "#171717"}
               transform="rotate(45)"
             />
           </g>
@@ -322,31 +323,31 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
             <circle
               r="10"
               fill="none"
-              stroke="#06b6d4"
+              stroke="#06B6D4"
               strokeWidth="1.5"
-              strokeOpacity="0.6"
+              strokeOpacity="0.65"
               className="animate-pulse"
             />
             <circle
               r="4.5"
-              fill="#22d3ee"
-              stroke="#083344"
+              fill="#22D3EE"
+              stroke="#042F2E"
               strokeWidth="1.5"
               filter="url(#target-glow)"
             />
             {/* Crosshair lines */}
-            <line x1="-14" y1="0" x2="-6" y2="0" stroke="#22d3ee" strokeWidth="1.5" />
-            <line x1="6" y1="0" x2="14" y2="0" stroke="#22d3ee" strokeWidth="1.5" />
-            <line x1="0" y1="-14" x2="0" y2="-6" stroke="#22d3ee" strokeWidth="1.5" />
-            <line x1="0" y1="6" x2="0" y2="14" stroke="#22d3ee" strokeWidth="1.5" />
+            <line x1="-14" y1="0" x2="-6" y2="0" stroke="#22D3EE" strokeWidth="1.5" />
+            <line x1="6" y1="0" x2="14" y2="0" stroke="#22D3EE" strokeWidth="1.5" />
+            <line x1="0" y1="-14" x2="0" y2="-6" stroke="#22D3EE" strokeWidth="1.5" />
+            <line x1="0" y1="6" x2="0" y2="14" stroke="#22D3EE" strokeWidth="1.5" />
 
             {/* Error label beside target */}
             <text
               x="16"
               y="-6"
-              fill="#e2e8f0"
+              fill="#F8FAFC"
               fontSize="10"
-              fontFamily="JetBrains Mono"
+              fontFamily="JetBrains Mono, monospace"
               fontWeight="600"
             >
               GT ({currentPoint.x.toFixed(2)}, {currentPoint.y.toFixed(2)})
@@ -354,9 +355,10 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
             <text
               x="16"
               y="7"
-              fill={currentPoint.isDegraded ? "#fbbf24" : "#f43f5e"}
+              fill={currentPoint.isDegraded ? "#FBBF24" : "#F43F5E"}
               fontSize="9"
-              fontFamily="JetBrains Mono"
+              fontFamily="JetBrains Mono, monospace"
+              fontWeight="600"
             >
               Δe: {currentPoint.errorMeters.toFixed(2)}m {currentPoint.isDegraded ? `[${currentPoint.status || 'DEGRADED'}]` : ''}
             </text>
@@ -383,10 +385,10 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                   cy={ay}
                   r="20"
                   fill="none"
-                  stroke="#34d399"
+                  stroke="#D9F56F"
                   strokeWidth="2"
                   strokeDasharray="4,2"
-                  opacity="0.8"
+                  opacity="0.9"
                   className="animate-spin"
                   style={{ transformOrigin: `${ax}px ${ay}px`, animationDuration: '6s' }}
                 />
@@ -399,18 +401,18 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                     cx={ax}
                     cy={ay}
                     r="12"
-                    fill="#10b981"
-                    fillOpacity="0.15"
-                    stroke="#10b981"
+                    fill="#D9F56F"
+                    fillOpacity="0.16"
+                    stroke="#D9F56F"
                     strokeWidth="1"
-                    strokeOpacity="0.5"
+                    strokeOpacity="0.45"
                   />
                   <circle
                     cx={ax}
                     cy={ay}
                     r="6"
-                    fill="#34d399"
-                    stroke="#042f2e"
+                    fill="#D9F56F"
+                    stroke="#171717"
                     strokeWidth="2"
                     filter="url(#anchor-glow)"
                   />
@@ -421,7 +423,7 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                     cx={ax}
                     cy={ay}
                     r="9"
-                    fill="#1e293b"
+                    fill="#1E293B"
                     stroke="#475569"
                     strokeWidth="1.5"
                     strokeDasharray="3,2"
@@ -431,7 +433,7 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
                     y1={ay - 5}
                     x2={ax + 5}
                     y2={ay + 5}
-                    stroke="#94a3b8"
+                    stroke="#94A3B8"
                     strokeWidth="1.5"
                   />
                 </>
@@ -441,21 +443,22 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
               {showAnchorLabels && (
                 <g>
                   <rect
-                    x={ax - 13}
+                    x={ax - 14}
                     y={ay + 10}
-                    width="26"
-                    height="15"
-                    fill={isSelected ? '#059669' : '#091518'}
-                    rx="3"
-                    stroke={isSelected ? '#34d399' : isActive ? '#10b981' : '#475569'}
-                    strokeWidth="1"
+                    width="28"
+                    height="16"
+                    fill={isSelected ? '#D9F56F' : '#070D10'}
+                    rx="4"
+                    stroke={isSelected ? '#D9F56F' : isActive ? '#D9F56F' : '#475569'}
+                    strokeWidth={isSelected ? '1.5' : '1'}
+                    strokeOpacity={isActive ? '0.8' : '0.5'}
                   />
                   <text
                     x={ax}
-                    y={ay + 21}
-                    fill={isSelected ? '#ffffff' : isActive ? '#6ee7b7' : '#94a3b8'}
-                    fontSize="9"
-                    fontFamily="JetBrains Mono"
+                    y={ay + 21.5}
+                    fill={isSelected ? '#171717' : isActive ? '#D9F56F' : '#94A3B8'}
+                    fontSize="9.5"
+                    fontFamily="JetBrains Mono, monospace"
                     fontWeight="bold"
                     textAnchor="middle"
                   >

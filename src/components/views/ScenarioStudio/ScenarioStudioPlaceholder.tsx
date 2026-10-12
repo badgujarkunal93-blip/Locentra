@@ -3,13 +3,13 @@ import {
   SlidersHorizontal, 
   Radio, 
   Cpu, 
-  RotateCcw,
-  Play,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  ArrowRight,
-  RefreshCw
+  RotateCcw, 
+  Play, 
+  Loader2, 
+  AlertCircle, 
+  CheckCircle2, 
+  ArrowRight, 
+  RefreshCw 
 } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { SectionHeader } from '../../ui/SectionHeader';
@@ -71,10 +71,10 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
         title="Scenario Studio & Degradation Studio"
         subtitle="Configure physical measurement channel parameters and run the Python numerical positioning engine."
         actions={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Button
               size="sm"
-              variant="outline"
+              variant="secondary"
               leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
               onClick={handleReset}
               disabled={isRunning}
@@ -83,7 +83,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
             </Button>
             <Button
               size="sm"
-              variant="outline"
+              variant="secondary"
               leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
               onClick={() => syncBackendConfig()}
               disabled={isRunning}
@@ -116,29 +116,29 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
 
       {/* Execution Status Feedback Banner */}
       {simulationState.status === 'loading' && (
-        <div className="rounded-xl p-4 bg-cyan-950/40 border border-cyan-500/40 flex items-center gap-3 text-xs text-cyan-200">
-          <Loader2 className="w-4 h-4 animate-spin text-cyan-400 shrink-0" />
+        <div className="rounded-[20px] p-5 bg-[#EBF5FF] border border-[#BFDBFE] flex items-center gap-3.5 text-xs text-[#1D4ED8]">
+          <Loader2 className="w-5 h-5 animate-spin text-[#1D4ED8] shrink-0" />
           <div>
-            <strong className="text-cyan-300 font-semibold">Running Python Simulation:</strong> Executing trajectory generation, synthetic range degradation, and {simulationState.selectedBackendSolver.toUpperCase()} solver in FastAPI backend...
+            <strong className="font-bold">Running Python Simulation:</strong> Executing trajectory generation, synthetic range degradation, and {simulationState.selectedBackendSolver.toUpperCase()} solver in FastAPI backend...
           </div>
         </div>
       )}
 
       {simulationState.status === 'error' && (
-        <div className="rounded-xl p-4 bg-rose-950/40 border border-rose-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-rose-200">
-          <div className="flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+        <div className="rounded-[20px] p-5 bg-rose-50 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-rose-800">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
             <div>
-              <strong className="text-rose-300 font-semibold">Backend Simulation Error:</strong> {simulationState.error}
-              <p className="text-[11px] text-rose-300/80 mt-0.5">
-                Ensure the FastAPI backend is running at <code className="bg-rose-900/40 px-1 py-0.5 rounded text-rose-200">{getApiBaseUrl()}</code> or check your network.
+              <strong className="font-bold">Backend Simulation Error:</strong> {simulationState.error}
+              <p className="text-[11px] text-rose-700 mt-1">
+                Ensure the FastAPI backend is running at <code className="bg-rose-100 px-1.5 py-0.5 rounded font-mono font-bold">{getApiBaseUrl()}</code> or check your network.
               </p>
             </div>
           </div>
           <Button
             size="xs"
             variant="outline"
-            className="border-rose-500/40 text-rose-200 hover:bg-rose-900/30 shrink-0"
+            className="border-rose-300 text-rose-800 hover:bg-rose-100 shrink-0"
             onClick={resetToDemoTrajectory}
           >
             Use Demo Trajectory
@@ -147,11 +147,11 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
       )}
 
       {simulationState.status === 'success' && simulationState.lastRunResponse && (
-        <div className="rounded-xl p-4 bg-emerald-950/40 border border-emerald-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-emerald-200">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="rounded-[20px] p-5 bg-[#F8FDE8] border border-[#D9F56F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#171717]">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[#171717] shrink-0" />
             <div>
-              <strong className="text-emerald-300 font-semibold">Live Simulation Complete:</strong> Generated {simulationState.lastRunResponse.estimates.length} trajectory points. RMSE: <span className="font-mono font-bold text-emerald-300">{(simulationState.lastRunResponse.metrics.rmse_m ?? 0).toFixed(3)}m</span> | Valid rate: <span className="font-mono font-bold text-emerald-300">{(simulationState.lastRunResponse.metrics.valid_estimate_rate * 100).toFixed(0)}%</span> via <span className="font-mono font-bold">{simulationState.lastRunResponse.algorithm_name}</span>.
+              <strong className="font-bold">Live Simulation Complete:</strong> Generated {simulationState.lastRunResponse.estimates.length} trajectory points. RMSE: <span className="font-mono font-bold">{(simulationState.lastRunResponse.metrics.rmse_m ?? 0).toFixed(3)}m</span> | Valid rate: <span className="font-mono font-bold">{(simulationState.lastRunResponse.metrics.valid_estimate_rate * 100).toFixed(0)}%</span> via <span className="font-mono font-bold">{simulationState.lastRunResponse.algorithm_name}</span>.
             </div>
           </div>
           <Button
@@ -167,11 +167,11 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
       )}
 
       {(simulationState?.validationErrors || []).length > 0 && (
-        <div className="rounded-xl p-3 bg-amber-950/40 border border-amber-500/40 text-xs text-amber-200 space-y-1">
-          <div className="font-semibold text-amber-300 flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5" /> Validation Notice:
+        <div className="rounded-[20px] p-4 bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-1">
+          <div className="font-bold flex items-center gap-1.5">
+            <AlertCircle className="w-4 h-4" /> Validation Notice:
           </div>
-          <ul className="list-disc list-inside text-[11px] text-amber-300/80">
+          <ul className="list-disc list-inside text-[11px] text-amber-700">
             {simulationState.validationErrors?.map((err, idx) => (
               <li key={idx}>{err}</li>
             ))}
@@ -181,19 +181,19 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 spans): Channel & Solver Parameters */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="border border-emerald-900/30">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
             <CardHeader>
               <div>
                 <CardTitle>
-                  <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
+                  <SlidersHorizontal className="w-4 h-4 text-[#171717]" />
                   Stochastic Channel & Trajectory Parameters
                 </CardTitle>
                 <CardDescription>
                   Configure synthetic range measurement corruption and spatial trajectory limits
                 </CardDescription>
               </div>
-              <Badge variant={simulationState.dataSource === 'backend' ? 'mint' : 'illustrative'} size="sm">
+              <Badge variant={simulationState.dataSource === 'backend' ? 'lime' : 'illustrative'} size="sm">
                 {simulationState.dataSource === 'backend' ? 'Live Backend Active' : 'Deterministic Demo'}
               </Badge>
             </CardHeader>
@@ -202,14 +202,14 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* Solver & Trajectory Selection Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">
+                  <label className="text-xs font-bold text-[#171717]">
                     Positioning Algorithm / Solver
                   </label>
                   <select
                     value={simulationState.selectedBackendSolver}
                     onChange={(e) => setSimulationConfig({ selectedBackendSolver: e.target.value as any })}
                     disabled={isRunning}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs text-[#171717] font-semibold focus:outline-none focus:border-[#D9F56F]"
                   >
                     <option value="robust_nls">Robust Non-Linear Least Squares (Huber / Levenberg-Marquardt)</option>
                     <option value="nls">Standard Non-Linear Least Squares (LSQ)</option>
@@ -219,14 +219,14 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">
+                  <label className="text-xs font-bold text-[#171717]">
                     Trajectory Pattern
                   </label>
                   <select
                     value={simulationState.trajectoryType}
                     onChange={(e) => setSimulationConfig({ trajectoryType: e.target.value as 'closed_loop' | 'straight_line' | 'curved' })}
                     disabled={isRunning}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs text-[#171717] font-semibold focus:outline-none focus:border-[#D9F56F]"
                   >
                     <option value="closed_loop">Closed Loop (Rectangular Patrol)</option>
                     <option value="straight_line">Straight Line (Diagonal Transit)</option>
@@ -239,8 +239,8 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-slate-200">Trajectory Points</span>
-                    <span className="font-mono text-cyan-400 font-bold">{simulationState.numPoints} points</span>
+                    <span className="font-bold text-[#171717]">Trajectory Points</span>
+                    <span className="font-mono text-[#171717] font-extrabold">{simulationState.numPoints} points</span>
                   </div>
                   <input
                     type="range"
@@ -250,9 +250,9 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                     value={simulationState.numPoints}
                     onChange={(e) => setSimulationConfig({ numPoints: parseInt(e.target.value, 10) })}
                     disabled={isRunning}
-                    className="w-full accent-cyan-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+                    className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                  <div className="flex justify-between text-[11px] font-mono text-[#777777]">
                     <span>10 pts (Fast)</span>
                     <span>60 pts (Standard)</span>
                     <span>300 pts (Dense)</span>
@@ -261,8 +261,8 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-slate-200">Simulation Random Seed</span>
-                    <span className="font-mono text-slate-400 text-[11px]">
+                    <span className="font-bold text-[#171717]">Simulation Random Seed</span>
+                    <span className="font-mono text-[#777777] text-[11px]">
                       {simulationState.randomSeed !== null ? `Seed: ${simulationState.randomSeed}` : 'Non-deterministic'}
                     </span>
                   </div>
@@ -278,7 +278,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                       }}
                       placeholder="e.g. 42"
                       disabled={isRunning}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2 text-xs text-[#171717] font-mono focus:outline-none focus:border-[#D9F56F]"
                     />
                     <Button
                       size="xs"
@@ -296,10 +296,10 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* Noise Std Dev */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-200">
+                  <span className="font-bold text-[#171717]">
                     Gaussian Range Noise (AWGN)
                   </span>
-                  <span className="font-mono text-emerald-400 font-bold">
+                  <span className="font-mono text-[#171717] font-extrabold">
                     σ = {activeScenario.noiseStdDevMeters.toFixed(2)} m
                   </span>
                 </div>
@@ -311,9 +311,9 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                   value={activeScenario.noiseStdDevMeters}
                   onChange={handleNoiseChange}
                   disabled={isRunning}
-                  className="w-full accent-emerald-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+                  className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-mono text-[#777777]">
                   <span>0.01 m (Lab UWB)</span>
                   <span>0.40 m (Noisy Industrial)</span>
                   <span>0.80 m (Severe Multipath)</span>
@@ -323,10 +323,10 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* Dropout Rate */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-200">
+                  <span className="font-bold text-[#171717]">
                     Intermittent Packet Dropout / Missing Observations
                   </span>
-                  <span className="font-mono text-cyan-400 font-bold">
+                  <span className="font-mono text-[#171717] font-extrabold">
                     {(activeScenario.dropoutRate * 100).toFixed(0)} %
                   </span>
                 </div>
@@ -338,9 +338,9 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                   value={activeScenario.dropoutRate}
                   onChange={handleDropoutChange}
                   disabled={isRunning}
-                  className="w-full accent-cyan-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+                  className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] font-mono text-[#777777]">
                   <span>0% (Full Stream)</span>
                   <span>25% (Sporadic Dropout)</span>
                   <span>50% (High Dropout)</span>
@@ -350,16 +350,16 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* NLOS Positive Bias */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-200">
+                  <span className="font-bold text-[#171717]">
                     Non-Line-of-Sight (NLOS) Exponential Bias & Probability
                   </span>
-                  <span className="font-mono text-amber-400 font-bold">
+                  <span className="font-mono text-amber-700 font-extrabold">
                     {(simulationState.nlosRate * 100).toFixed(0)}% rate | μ = +{activeScenario.multipathBiasMeanMeters.toFixed(2)} m
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">NLOS Occurrence Probability</label>
+                    <label className="text-[11px] text-[#777777] block mb-1">NLOS Occurrence Probability</label>
                     <input
                       type="range"
                       min="0.00"
@@ -368,11 +368,11 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                       value={simulationState.nlosRate}
                       onChange={(e) => setSimulationConfig({ nlosRate: parseFloat(e.target.value) })}
                       disabled={isRunning}
-                      className="w-full accent-amber-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+                      className="w-full accent-amber-600 bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] text-slate-400 block mb-1">Mean Positive Shift (μ)</label>
+                    <label className="text-[11px] text-[#777777] block mb-1">Mean Positive Shift (μ)</label>
                     <input
                       type="range"
                       min="0.00"
@@ -381,7 +381,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                       value={activeScenario.multipathBiasMeanMeters}
                       onChange={handleBiasChange}
                       disabled={isRunning}
-                      className="w-full accent-amber-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+                      className="w-full accent-amber-600 bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -390,18 +390,18 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
           </Card>
 
           {/* Active Transceivers Grid */}
-          <Card className="border border-emerald-900/30">
+          <Card>
             <CardHeader>
               <div>
                 <CardTitle>
-                  <Radio className="w-4 h-4 text-emerald-400" />
+                  <Radio className="w-4 h-4 text-[#171717]" />
                   Anchor Transceiver Constellation
                 </CardTitle>
                 <CardDescription>
                   Active anchor nodes synchronized with backend geometry (12m × 8m room).
                 </CardDescription>
               </div>
-              <Badge variant="cyan" size="sm">
+              <Badge variant="lime" size="sm">
                 6 Canonical Nodes
               </Badge>
             </CardHeader>
@@ -410,13 +410,13 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {activeScenario.anchors.map((anchor) => (
                 <div
                   key={anchor.id}
-                  className="p-3 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between"
+                  className="p-3.5 rounded-[18px] bg-[#F9F9F9] border border-[#EAEAEA] flex items-center justify-between"
                 >
                   <div>
-                    <span className="font-mono font-bold text-xs text-slate-200">{anchor.id}</span>
-                    <p className="text-[10px] text-slate-400 truncate">({anchor.x}m, {anchor.y}m, {anchor.z}m)</p>
+                    <span className="font-mono font-bold text-xs text-[#171717]">{anchor.id}</span>
+                    <p className="text-[10px] text-[#777777] truncate font-mono">({anchor.x}m, {anchor.y}m, {anchor.z}m)</p>
                   </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
                 </div>
               ))}
             </div>
@@ -424,19 +424,19 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
         </div>
 
         {/* Right Column: Schema Preview & Engine Metadata */}
-        <div className="space-y-4">
-          <Card className="border border-emerald-900/30">
+        <div className="space-y-6">
+          <Card>
             <CardHeader>
               <CardTitle>
-                <Cpu className="w-4 h-4 text-emerald-400" />
+                <Cpu className="w-4 h-4 text-[#171717]" />
                 Live Request Contract
               </CardTitle>
-              <Badge variant="mint" size="sm">
+              <Badge variant="lime" size="sm">
                 POST /api/v1/simulations/run
               </Badge>
             </CardHeader>
 
-            <pre className="p-3 rounded-lg bg-slate-950 border border-slate-800/80 text-[11px] font-mono text-emerald-400/90 overflow-x-auto">
+            <pre className="p-4 rounded-[18px] bg-[#232124] text-white border border-[#333134] text-[11px] font-mono overflow-x-auto shadow-inner">
 {JSON.stringify({
   solver: simulationState.selectedBackendSolver,
   trajectory_type: simulationState.trajectoryType,
@@ -448,21 +448,21 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
   seed: simulationState.randomSeed,
 }, null, 2)}
             </pre>
-            <p className="text-[11px] text-slate-400 mt-2">
+            <p className="text-[11px] text-[#777777] mt-3">
               Dispatched directly to the FastAPI positioning service.
             </p>
           </Card>
 
-          <Card variant="forest" className="border-emerald-800/40">
+          <div className="bg-[#F5F2FE] border border-[#DDD6F8] rounded-[24px] p-6 shadow-xs">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold text-emerald-200">
-                Phase 5 Numerical Integration
+              <span className="text-xs font-bold text-[#4C3B9E]">
+                Solver Numerical Integration
               </span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-[#555555] leading-relaxed">
               When triggered, the backend generates ground truth coordinates, corrupts range measurements with physical noise and NLOS biases, and executes the selected mathematical solver. Results update the 2D & 3D Spatial Lab immediately.
             </p>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

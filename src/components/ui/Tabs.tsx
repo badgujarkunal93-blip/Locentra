@@ -27,7 +27,7 @@ export function Tabs<T extends string = string>({
     <div
       role="tablist"
       className={cn(
-        'inline-flex items-center p-1 rounded-lg bg-slate-950/80 border border-slate-800/80 backdrop-blur-md',
+        'inline-flex items-center p-1 rounded-full bg-[#E5E5E5] border border-[#DADADA]',
         className
       )}
     >
@@ -40,11 +40,11 @@ export function Tabs<T extends string = string>({
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'relative flex items-center gap-2 rounded-md font-medium transition-all duration-150 select-none cursor-pointer',
-              size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-xs sm:text-sm',
+              'relative flex items-center gap-2 rounded-full font-semibold transition-all duration-150 select-none cursor-pointer',
+              size === 'sm' ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm',
               isActive
-                ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                ? 'bg-white text-[#171717] shadow-xs'
+                : 'text-[#666666] hover:text-[#171717] hover:bg-black/5'
             )}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}
@@ -52,8 +52,8 @@ export function Tabs<T extends string = string>({
             {tab.count !== undefined && (
               <span
                 className={cn(
-                  'px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold',
-                  isActive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'
+                  'px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold',
+                  isActive ? 'bg-[#D9F56F] text-[#171717]' : 'bg-[#D0D0D0] text-[#555555]'
                 )}
               >
                 {tab.count}

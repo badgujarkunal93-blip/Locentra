@@ -1,5 +1,5 @@
 /**
- * Centralized, typed API client for AnchorSense AI backend (Phase 5).
+ * Centralized, typed API client for Locentra backend.
  */
 
 import {

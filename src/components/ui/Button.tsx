@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { cn } from '../../lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ai-accent' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ai-accent' | 'danger' | 'ghost' | 'dark';
   size?: 'xs' | 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -20,22 +20,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   disabled,
   ...props
 }, ref) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-150 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 disabled:opacity-50 disabled:pointer-events-none cursor-pointer';
+  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-150 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D9F56F] disabled:opacity-50 disabled:pointer-events-none cursor-pointer';
 
   const sizeStyles = {
-    xs: 'text-xs px-2.5 py-1 rounded-md gap-1.5',
-    sm: 'text-xs px-3 py-1.5 rounded-md gap-2 font-medium',
-    md: 'text-sm px-4 py-2 rounded-lg gap-2',
-    lg: 'text-base px-5 py-2.5 rounded-lg gap-2.5 font-semibold',
+    xs: 'text-xs px-3 py-1 rounded-full gap-1.5',
+    sm: 'text-xs px-3.5 py-1.5 rounded-full gap-2 font-medium',
+    md: 'text-sm px-5 py-2.5 rounded-full gap-2 font-semibold',
+    lg: 'text-base px-6 py-3 rounded-full gap-2.5 font-bold',
   };
 
   const variantStyles = {
-    primary: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] border border-emerald-400/50 active:scale-[0.98]',
-    secondary: 'bg-slate-900/80 hover:bg-slate-800 text-emerald-300 border border-emerald-800/40 hover:border-emerald-600/60 shadow-sm active:scale-[0.98]',
-    outline: 'bg-transparent hover:bg-slate-900/60 text-slate-300 hover:text-emerald-300 border border-slate-700/60 hover:border-emerald-600/50',
-    'ai-accent': 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-medium border border-violet-400/40 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] active:scale-[0.98]',
-    danger: 'bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-700/50 hover:border-rose-500 shadow-sm',
-    ghost: 'bg-transparent hover:bg-slate-800/60 text-slate-400 hover:text-slate-100',
+    primary: 'bg-[#D9F56F] hover:bg-[#cbe85f] text-[#171717] font-semibold shadow-sm active:scale-[0.98]',
+    secondary: 'bg-white hover:bg-[#F7F7F7] text-[#171717] border border-[#EAEAEA] font-semibold shadow-sm active:scale-[0.98]',
+    outline: 'bg-transparent hover:bg-black/5 text-[#171717] border border-[#D5D5D5] font-medium active:scale-[0.98]',
+    'ai-accent': 'bg-[#DDD6F8] hover:bg-[#cec4f4] text-[#4C3B9E] font-semibold border border-[#B6A9EF] active:scale-[0.98]',
+    danger: 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 shadow-sm active:scale-[0.98]',
+    ghost: 'bg-transparent hover:bg-black/5 text-[#555555] hover:text-[#171717]',
+    dark: 'bg-[#232124] hover:bg-[#343135] text-white font-semibold shadow-sm active:scale-[0.98]',
   };
 
   return (

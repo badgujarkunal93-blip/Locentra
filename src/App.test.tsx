@@ -3,7 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import App from './App';
 import { useAppStore } from './store/useAppStore';
 
-describe('AnchorSense AI Shell & Navigation (Phase 1 & 2)', () => {
+describe('Locentra Shell & Navigation', () => {
   beforeEach(() => {
     // Reset state before each test
     useAppStore.setState({
@@ -14,7 +14,7 @@ describe('AnchorSense AI Shell & Navigation (Phase 1 & 2)', () => {
 
   it('renders application brand, header, and primary navigation destinations', () => {
     render(<App />);
-    const brandOccurrences = screen.getAllByText('AnchorSense');
+    const brandOccurrences = screen.getAllByText('Locentra');
     expect(brandOccurrences.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Spatial Intelligence')).toBeInTheDocument();
     

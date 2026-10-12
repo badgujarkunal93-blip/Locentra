@@ -17,23 +17,23 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 }) => {
   const statusConfig: Record<EngineStatus, { color: string; pingColor: string; text: string }> = {
     online: {
-      color: 'bg-emerald-400',
-      pingColor: 'bg-emerald-500',
+      color: 'bg-emerald-500',
+      pingColor: 'bg-emerald-400',
       text: 'Engine Ready',
     },
     busy: {
-      color: 'bg-cyan-400',
-      pingColor: 'bg-cyan-500',
+      color: 'bg-[#55A6FF]',
+      pingColor: 'bg-[#55A6FF]',
       text: 'Solving Batch',
     },
     calibrating: {
-      color: 'bg-amber-400',
-      pingColor: 'bg-amber-500',
+      color: 'bg-[#F59E0B]',
+      pingColor: 'bg-[#F59E0B]',
       text: 'Calibrating ML',
     },
     offline: {
       color: 'bg-rose-500',
-      pingColor: 'bg-rose-600',
+      pingColor: 'bg-rose-400',
       text: 'Engine Offline',
     },
   };
@@ -53,15 +53,15 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         )}
         <span
           className={cn(
-            'relative inline-flex rounded-full h-2.5 w-2.5 shadow-sm',
+            'relative inline-flex rounded-full h-2.5 w-2.5 shadow-xs',
             current.color
           )}
         />
       </span>
       {label !== undefined ? (
-        <span className="text-slate-300 font-medium">{label}</span>
+        <span className="font-semibold">{label}</span>
       ) : (
-        <span className="text-slate-300 font-medium">{current.text}</span>
+        <span className="font-semibold">{current.text}</span>
       )}
     </div>
   );

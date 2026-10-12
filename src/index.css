@@ -2,34 +2,39 @@
 
 @layer base {
   :root {
-    --bg-main: #070c0e;
-    --bg-surface-charcoal: #0e171b;
-    --bg-surface-forest: #0b1a16;
-    --bg-surface-panel: #112020;
-    
-    --border-tech: rgba(40, 80, 70, 0.35);
-    --border-tech-bright: rgba(52, 211, 153, 0.4);
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    /* Exact Color System Tokens */
+    --accent-lime: #D9F56F;
+    --accent-lavender: #B6A9EF;
+    --accent-purple-light: #DDD6F8;
+    --surface-dark: #232124;
+    --surface-bg: #E6E6E6;
+    --surface-card: #FFFFFF;
+    --text-primary: #171717;
+    --text-secondary: #777777;
+    --border-subtle: #EAEAEA;
 
-    --signal-mint: #10b981;
-    --signal-mint-bright: #34d399;
-    --signal-cyan: #06b6d4;
-    --signal-cyan-bright: #22d3ee;
-    --signal-violet: #8b5cf6;
-    --signal-violet-bright: #a78bfa;
-    --signal-amber: #f59e0b;
-    --signal-rose: #f43f5e;
+    /* Semantic Mappings */
+    --bg-main: #E6E6E6;
+    --bg-surface-charcoal: #232124;
+    --border-tech: #EAEAEA;
+    --border-tech-bright: #D9F56F;
+    
+    --signal-mint: #D9F56F;
+    --signal-cyan: #55A6FF;
+    --signal-violet: #B6A9EF;
+    --signal-amber: #F59E0B;
+    --signal-rose: #EF4444;
   }
 
   * {
-    border-color: var(--border-tech);
+    border-color: #EAEAEA;
     box-sizing: border-box;
   }
 
   body {
-    background-color: var(--bg-main);
-    color: #e2e8f0;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #E6E6E6;
+    color: #171717;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
   }
 
@@ -38,36 +43,51 @@
   }
 }
 
-/* Technical atmospheric background grid pattern */
-.bg-tech-grid {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(20, 80, 60, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(20, 80, 60, 0.12) 1px, transparent 1px);
+/* Neo-minimalist Premium Card Styles */
+.neo-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 24px;
+  box-shadow: 0 2px 14px -2px rgba(0, 0, 0, 0.04);
 }
 
-.bg-tech-grid-dense {
-  background-size: 16px 16px;
-  background-image: 
-    linear-gradient(to right, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(16, 185, 129, 0.08) 1px, transparent 1px);
+.neo-card-dark {
+  background-color: #232124;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.12);
 }
 
-.bg-tech-radial-glow {
-  background: radial-gradient(
-    circle at 50% 0%, 
-    rgba(16, 185, 129, 0.08) 0%, 
-    rgba(6, 182, 212, 0.04) 35%, 
-    transparent 70%
-  );
+.neo-card-lavender {
+  background-color: #F5F2FE;
+  border: 1px solid #DDD6F8;
+  border-radius: 24px;
+  box-shadow: 0 2px 12px -2px rgba(182, 169, 239, 0.08);
 }
 
-/* Glassmorphic technical cards */
+.neo-card-lime {
+  background-color: #F8FDE8;
+  border: 1px solid #D9F56F;
+  border-radius: 24px;
+}
+
+.neo-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-card-hover:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.07);
+}
+
+/* Backward compatibility aliases for existing views */
 .tech-card {
-  background: linear-gradient(135deg, rgba(14, 25, 26, 0.85) 0%, rgba(10, 20, 22, 0.95) 100%);
-  border: 1px solid rgba(45, 95, 80, 0.3);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  background-color: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 22px;
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
+  color: #171717;
 }
 
 .tech-card-hover {
@@ -75,52 +95,55 @@
 }
 
 .tech-card-hover:hover {
-  border-color: rgba(52, 211, 153, 0.5);
-  box-shadow: 0 6px 30px -4px rgba(16, 185, 129, 0.12), inset 0 1px 0 0 rgba(52, 211, 153, 0.2);
+  border-color: #D9F56F;
+  box-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
 }
 
 .tech-card-ai {
-  background: linear-gradient(135deg, rgba(18, 16, 32, 0.85) 0%, rgba(12, 18, 26, 0.95) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(167, 139, 250, 0.08);
+  background-color: #F5F2FE;
+  border: 1px solid #DDD6F8;
+  border-radius: 22px;
+  color: #171717;
 }
 
-.tech-card-ai:hover {
-  border-color: rgba(167, 139, 250, 0.45);
-  box-shadow: 0 6px 30px -4px rgba(139, 92, 246, 0.15), inset 0 1px 0 0 rgba(167, 139, 250, 0.2);
+.navy-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 24px;
+  box-shadow: 0 2px 14px -2px rgba(0, 0, 0, 0.04);
 }
 
-/* Signal Glows */
-.glow-mint {
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+.navy-card-subtle {
+  background-color: #F9F9F9;
+  border: 1px solid #EAEAEA;
+  border-radius: 18px;
 }
 
-.glow-cyan {
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+.navy-card-elevated {
+  background-color: #232124;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
 }
 
-.glow-violet {
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.35);
-}
-
-/* Custom Scrollbar for scientific consoles */
+/* Minimalist Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090e11;
+  background: #E6E6E6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1c332e;
+  background: #C4C4C4;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #275249;
+  background: #A0A0A0;
 }
 
 /* Reduced motion accessibility */

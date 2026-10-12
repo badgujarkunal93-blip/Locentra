@@ -1,6 +1,6 @@
-# AnchorSense AI — Indoor Localisation Research Platform
+# Locentra — Indoor Positioning Platform
 
-AnchorSense AI is a spatial-intelligence command centre and indoor localisation research platform. It is engineered to analyse and estimate 2D indoor target coordinates from noisy, missing, or multipath-biased reference-point range measurements (e.g. UWB/ToF anchors), model non-line-of-sight (NLOS) degradations, and benchmark mathematical positioning solvers alongside machine learning residual calibration.
+Locentra is a spatial-intelligence command centre and indoor localisation research platform. It is engineered to analyse and estimate 2D indoor target coordinates from noisy, missing, or multipath-biased reference-point range measurements (e.g. UWB/ToF anchors), model non-line-of-sight (NLOS) degradations, and benchmark mathematical positioning solvers alongside machine learning residual calibration.
 
 > [!NOTE]
 > **Demonstration Baseline Notice:** The spatial trajectory and positional estimates currently rendered in the Phase 1 & Phase 2 interface represent deterministic baseline demonstration data designed for spatial validation and UI verification. The numerical localisation algorithms (Trilateration, Non-linear Least Squares, and Extended Kalman Filter) and stochastic measurement models are scheduled for Phase 3 integration.
