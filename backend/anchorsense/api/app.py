@@ -66,6 +66,7 @@ DEFAULT_CORS_ORIGINS = [
     "http://127.0.0.1:4173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://locentra-olive.vercel.app",
 ]
 allowed_origins_env = os.environ.get("ALLOWED_ORIGINS")
 configured_origins = (

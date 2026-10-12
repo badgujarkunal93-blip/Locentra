@@ -60,6 +60,18 @@ class TestHealthAndConfigEndpoints:
         assert res.headers.get("access-control-allow-origin") == "http://localhost:5173"
         assert "access-control-allow-credentials" in res.headers
 
+    def test_cors_headers_vercel_production_origin(self):
+        """Vercel production origin receives proper CORS response headers."""
+        res = client.options(
+            "/api/v1/config/default",
+            headers={
+                "Origin": "https://locentra-olive.vercel.app",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        assert res.status_code == 200
+        assert res.headers.get("access-control-allow-origin") == "https://locentra-olive.vercel.app"
+
     def test_cors_headers_unauthorized_origin(self):
         """Unauthorized external origin does not receive access-control-allow-origin header."""
         res = client.options(
