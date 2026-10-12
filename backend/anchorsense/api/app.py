@@ -68,11 +68,13 @@ DEFAULT_CORS_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 allowed_origins_env = os.environ.get("ALLOWED_ORIGINS")
-origins = (
+configured_origins = (
     [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
     if allowed_origins_env
-    else DEFAULT_CORS_ORIGINS
+    else []
 )
+# Union of configured origins and default local dev origins
+origins = list(dict.fromkeys(DEFAULT_CORS_ORIGINS + configured_origins))
 
 app.add_middleware(
     CORSMiddleware,
