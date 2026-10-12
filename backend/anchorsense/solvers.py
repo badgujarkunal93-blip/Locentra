@@ -243,6 +243,23 @@ def solve_robust_nls(
     f_scale : float
         Value of soft margin between inlier and outlier residuals (metres).
     """
+    SUPPORTED_ROBUST_LOSSES = {"linear", "soft_l1", "huber", "cauchy", "arctan"}
+    if loss not in SUPPORTED_ROBUST_LOSSES:
+        return PositionEstimate(
+            timestamp=timestamp,
+            status=EstimateStatus.INVALID_INPUT,
+            num_valid_measurements=0,
+            convergence_message=f"Unsupported loss '{loss}'; expected one of {sorted(SUPPORTED_ROBUST_LOSSES)}",
+        )
+
+    if f_scale <= 0:
+        return PositionEstimate(
+            timestamp=timestamp,
+            status=EstimateStatus.INVALID_INPUT,
+            num_valid_measurements=0,
+            convergence_message="f_scale must be positive",
+        )
+
     anchor_xy, ranges, ids = _prepare_inputs(measurements, anchors)
     n_valid = len(ranges)
 

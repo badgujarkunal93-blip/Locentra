@@ -246,3 +246,26 @@ class TestSolveRobustNLS:
         r2 = solve_robust_nls(meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM)
         # Both should have the same set of attributes
         assert set(vars(r1).keys()) == set(vars(r2).keys())
+
+    def test_invalid_loss_rejected(self):
+        """Unsupported loss function returns INVALID_INPUT status."""
+        meas = _noise_free_measurements(KNOWN_X, KNOWN_Y, GOOD_ANCHORS)
+        result = solve_robust_nls(
+            meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM,
+            loss="unsupported_loss_func",
+        )
+        assert result.status == EstimateStatus.INVALID_INPUT
+        assert "Unsupported loss" in result.convergence_message
+
+    def test_non_positive_f_scale_rejected(self):
+        """Zero or negative f_scale returns INVALID_INPUT status."""
+        meas = _noise_free_measurements(KNOWN_X, KNOWN_Y, GOOD_ANCHORS)
+        res_zero = solve_robust_nls(
+            meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, f_scale=0.0,
+        )
+        assert res_zero.status == EstimateStatus.INVALID_INPUT
+        res_neg = solve_robust_nls(
+            meas, GOOD_ANCHORS, timestamp=0.0, room=ROOM, f_scale=-1.0,
+        )
+        assert res_neg.status == EstimateStatus.INVALID_INPUT
+

@@ -36,6 +36,10 @@ class RoomGeometry:
     length: float = 8.0   # metres (y-axis span)
     height: float = 3.5   # metres
 
+    def __post_init__(self) -> None:
+        if self.width <= 0 or self.length <= 0 or self.height <= 0:
+            raise ValueError("Room dimensions must be positive")
+
 
 # Default anchor layout — coordinates taken directly from the frontend store.
 DEFAULT_ANCHORS: tuple[Anchor, ...] = (
@@ -81,6 +85,10 @@ class SimulationConfig:
             raise ValueError("outlier_rate must be in [0, 1)")
         if not 0 <= self.nlos_rate < 1:
             raise ValueError("nlos_rate must be in [0, 1)")
+        if self.outlier_magnitude < 0:
+            raise ValueError("outlier_magnitude must be non-negative")
+        if self.nlos_bias_mean < 0:
+            raise ValueError("nlos_bias_mean must be non-negative")
 
 
 # ---------------------------------------------------------------------------

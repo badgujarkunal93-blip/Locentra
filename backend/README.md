@@ -32,13 +32,15 @@ backend/
 ## Coordinate Conventions
 
 - **Origin**: Room corner `(0, 0)`.
-- **Dimensions**: Matches the frontend default `12.0 m × 12.0 m`.
+- **Dimensions**: Matches the frontend canonical room `12.0 m × 8.0 m × 3.5 m`.
 - **Units**: Coordinates in metres, timestamps in seconds.
-- **Anchor layout**: Exact match to the 4 ceiling anchors configured in `useAppStore.ts`:
-  - `A1`: `(1.0, 1.0, 3.0)`
-  - `A2`: `(11.0, 1.0, 3.0)`
-  - `A3`: `(11.0, 11.0, 3.0)`
-  - `A4`: `(1.0, 11.0, 3.0)`
+- **Anchor layout**: Exact match to the 6 ceiling anchors configured in `useAppStore.ts`:
+  - `A1`: `(0.5, 0.5, 2.8)`  — Northwest corner
+  - `A2`: `(11.5, 0.5, 2.8)` — Northeast corner
+  - `A3`: `(11.5, 7.5, 2.8)` — Southeast corner
+  - `A4`: `(0.5, 7.5, 2.8)`  — Southwest corner
+  - `A5`: `(6.0, 0.2, 3.2)`  — Mid-North perimeter
+  - `A6`: `(6.0, 7.8, 3.2)`  — Mid-South perimeter
 
 ---
 

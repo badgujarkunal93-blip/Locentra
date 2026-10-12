@@ -225,3 +225,20 @@ class TestMeasurementGeneration:
     def test_invalid_dropout_rate_raises(self):
         with pytest.raises(ValueError):
             SimulationConfig(dropout_rate=1.0)
+
+    def test_invalid_outlier_magnitude_raises(self):
+        with pytest.raises(ValueError, match="outlier_magnitude"):
+            SimulationConfig(outlier_magnitude=-1.0)
+
+    def test_invalid_nlos_bias_mean_raises(self):
+        with pytest.raises(ValueError, match="nlos_bias_mean"):
+            SimulationConfig(nlos_bias_mean=-0.5)
+
+    def test_invalid_room_dimensions_raises(self):
+        with pytest.raises(ValueError, match="Room dimensions must be positive"):
+            RoomGeometry(width=-12.0)
+        with pytest.raises(ValueError, match="Room dimensions must be positive"):
+            RoomGeometry(length=0.0)
+        with pytest.raises(ValueError, match="Room dimensions must be positive"):
+            RoomGeometry(height=-3.5)
+
