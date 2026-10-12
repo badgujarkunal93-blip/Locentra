@@ -118,26 +118,38 @@ export const CommandCenterView: React.FC = () => {
     return true;
   });
 
+  const simulationState = useAppStore((s) => s.simulationState);
+
+  const hasLiveSimulation = simulationState.dataSource === 'backend' && simulationState.lastRunResponse !== null;
+  const liveMetrics = simulationState.lastRunResponse?.metrics;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Illustrative Notice Banner */}
-      <div className="rounded-xl p-4 bg-gradient-to-r from-emerald-950/40 via-cyan-950/30 to-slate-900/60 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
+      {/* Dynamic Origin & Notice Banner */}
+      <div className={`rounded-xl p-4 border flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg ${
+        hasLiveSimulation
+          ? 'bg-gradient-to-r from-emerald-950/60 via-slate-900/60 to-slate-950/80 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+          : 'bg-gradient-to-r from-emerald-950/40 via-cyan-950/30 to-slate-900/60 border-emerald-500/30'
+      }`}>
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0 mt-0.5">
-            <Info className="w-4 h-4" />
+            {hasLiveSimulation ? <CheckCircle2 className="w-4 h-4" /> : <Info className="w-4 h-4" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-100">
-                Phase 1 Prototype Shell & Design System
+                {hasLiveSimulation ? 'Live FastAPI Backend Engine Metrics' : 'Phase 1 Prototype Shell & Design System'}
               </span>
-              <Badge variant="illustrative" size="sm">
-                Illustrative Metrics
+              <Badge variant={hasLiveSimulation ? 'mint' : 'illustrative'} size="sm">
+                {hasLiveSimulation ? `Live Solver: ${simulationState.selectedBackendSolver.toUpperCase()}` : 'Illustrative Metrics'}
               </Badge>
             </div>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
-              All positioning metrics, solver accuracies and benchmark histories shown below are representative baseline models for UI verification. 
-              Live Python numerical solvers (NLLS, EKF) and ML residual engines will be integrated in Phases 3, 4, and 5.
+              {hasLiveSimulation ? (
+                <>Real numerical metrics computed from request-based simulation ({simulationState.lastRunResponse?.estimates.length} points). Real-time simulation is discrete on-demand, not continuous WebSockets.</>
+              ) : (
+                <>All positioning metrics and benchmark histories below are representative baseline models for UI verification until triggered via Scenario Studio or Benchmark Arena.</>
+              )}
             </p>
           </div>
         </div>
@@ -186,30 +198,30 @@ export const CommandCenterView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Root Mean Squared Error"
-          value="0.28"
+          value={hasLiveSimulation && liveMetrics?.rmse_m !== null && liveMetrics?.rmse_m !== undefined ? liveMetrics.rmse_m.toFixed(2) : "0.28"}
           unit="m"
           accent="mint"
           delta={{
-            value: "-24.2%",
+            value: hasLiveSimulation && liveMetrics ? `${(liveMetrics.valid_estimate_rate * 100).toFixed(0)}%` : "-24.2%",
             isImprovement: true,
-            label: "vs raw trilateration"
+            label: hasLiveSimulation ? "valid estimates" : "vs raw trilateration"
           }}
-          confidenceInterval="[0.24, 0.33] m"
+          confidenceInterval={hasLiveSimulation && liveMetrics?.median_error_m !== null && liveMetrics?.median_error_m !== undefined ? `Median: ${liveMetrics.median_error_m.toFixed(2)}m` : "[0.24, 0.33] m"}
           icon={<Target className="w-4 h-4" />}
           trend={[0.48, 0.42, 0.38, 0.34, 0.30, 0.28]}
         />
 
         <MetricCard
           title="95th-Percentile Bound (P95)"
-          value="0.58"
+          value={hasLiveSimulation && liveMetrics?.p95_error_m !== null && liveMetrics?.p95_error_m !== undefined ? liveMetrics.p95_error_m.toFixed(2) : "0.58"}
           unit="m"
           accent="cyan"
           delta={{
-            value: "-0.57m",
+            value: hasLiveSimulation && liveMetrics ? `Total: ${liveMetrics.total_count} pts` : "-0.57m",
             isImprovement: true,
-            label: "maximum outlier bound"
+            label: hasLiveSimulation ? "evaluated points" : "maximum outlier bound"
           }}
-          confidenceInterval="P99: 0.82m"
+          confidenceInterval={hasLiveSimulation && liveMetrics?.mean_error_m !== null && liveMetrics?.mean_error_m !== undefined ? `Mean: ${liveMetrics.mean_error_m.toFixed(2)}m` : "P99: 0.82m"}
           icon={<BarChart2 className="w-4 h-4" />}
           trend={[1.15, 0.98, 0.85, 0.72, 0.62, 0.58]}
         />

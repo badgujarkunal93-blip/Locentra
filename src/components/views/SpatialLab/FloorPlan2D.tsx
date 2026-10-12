@@ -290,7 +290,7 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
           />
         )}
 
-        {/* Demonstration Estimated Target Position Marker (Mint Diamond) */}
+        {/* Estimated Target Position Marker (Mint Diamond or Amber if degraded) */}
         {showEstimated && currentPoint && (
           <g transform={`translate(${toSvgX(currentPoint.estimatedX)}, ${toSvgY(currentPoint.estimatedY)})`}>
             <rect
@@ -298,9 +298,10 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
               y="-6"
               width="12"
               height="12"
-              fill="#10b981"
-              stroke="#34d399"
+              fill={currentPoint.isDegraded ? "#f59e0b" : "#10b981"}
+              stroke={currentPoint.isDegraded ? "#fbbf24" : "#34d399"}
               strokeWidth="1.5"
+              strokeDasharray={currentPoint.isDegraded ? "2,2" : undefined}
               transform="rotate(45)"
               filter="url(#target-glow)"
             />
@@ -309,7 +310,7 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
               y="-2"
               width="4"
               height="4"
-              fill="#062e24"
+              fill={currentPoint.isDegraded ? "#451a03" : "#062e24"}
               transform="rotate(45)"
             />
           </g>
@@ -353,11 +354,11 @@ export const FloorPlan2D: React.FC<FloorPlan2DProps> = ({ className }) => {
             <text
               x="16"
               y="7"
-              fill="#f43f5e"
+              fill={currentPoint.isDegraded ? "#fbbf24" : "#f43f5e"}
               fontSize="9"
               fontFamily="JetBrains Mono"
             >
-              Δe: {currentPoint.errorMeters.toFixed(2)}m
+              Δe: {currentPoint.errorMeters.toFixed(2)}m {currentPoint.isDegraded ? `[${currentPoint.status || 'DEGRADED'}]` : ''}
             </text>
           </g>
         )}

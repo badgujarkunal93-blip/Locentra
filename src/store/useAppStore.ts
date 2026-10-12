@@ -3,6 +3,8 @@ import { NavigationSectionId } from '../types/navigation';
 import { EngineStatus, SystemHealthState } from '../types/telemetry';
 import { ScenarioConfiguration, SpatialViewMode, TrajectoryPoint } from '../types/scenario';
 import { generateDemonstrationTrajectory } from '../components/views/SpatialLab/trajectoryUtils';
+import { SimulationRunResponse, SimulationCompareResponse, SolverType } from '../types/api';
+import { apiClient, mapSimulationToTrajectoryPoints } from '../lib/apiClient';
 
 interface AppState {
   // Navigation
@@ -57,11 +59,38 @@ interface AppState {
   // UI Dialogs
   isQuickRunModalOpen: boolean;
   setQuickRunModalOpen: (open: boolean) => void;
+
+  // Real Backend Integration (Phase 5)
+  simulationState: {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    dataSource: 'backend' | 'demo';
+    error: string | null;
+    validationErrors: string[] | null;
+    lastRunResponse: SimulationRunResponse | null;
+    activeAlgorithmName: string;
+    numPoints: number;
+    randomSeed: number;
+    trajectoryType: 'closed_loop' | 'straight_line' | 'curved';
+    nlosRate: number;
+    selectedBackendSolver: SolverType;
+  };
+  setSimulationParam: (params: Partial<AppState['simulationState']>) => void;
+  setSimulationConfig: (params: Partial<AppState['simulationState']>) => void;
+  runBackendSimulation: () => Promise<void>;
+  resetToDemoTrajectory: () => void;
+
+  benchmarkState: {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    dataSource: 'backend' | 'demo';
+    error: string | null;
+    lastCompareResponse: SimulationCompareResponse | null;
+  };
+  runBackendBenchmark: () => Promise<void>;
 }
 
 const initialTrajectory = generateDemonstrationTrajectory(80);
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   activeSection: 'command-center',
   setActiveSection: (section) => set({ activeSection: section }),
 
@@ -158,4 +187,173 @@ export const useAppStore = create<AppState>((set) => ({
 
   isQuickRunModalOpen: false,
   setQuickRunModalOpen: (open) => set({ isQuickRunModalOpen: open }),
+
+  // Real Backend Integration (Phase 5)
+  simulationState: {
+    status: 'idle',
+    dataSource: 'demo',
+    error: null,
+    validationErrors: null,
+    lastRunResponse: null,
+    activeAlgorithmName: 'Deterministic Demo Baseline',
+    numPoints: 80,
+    randomSeed: 42,
+    trajectoryType: 'closed_loop',
+    nlosRate: 0.10,
+    selectedBackendSolver: 'robust_nls',
+  },
+  setSimulationParam: (params) =>
+    set((state) => ({
+      simulationState: { ...state.simulationState, ...params },
+    })),
+  setSimulationConfig: (params) =>
+    set((state) => ({
+      simulationState: { ...state.simulationState, ...params },
+    })),
+
+  runBackendSimulation: async () => {
+    const { activeScenario, simulationState } = get();
+    set((state) => ({
+      simulationState: { ...state.simulationState, status: 'loading', error: null, validationErrors: null },
+    }));
+
+    try {
+      const response = await apiClient.runSimulation({
+        trajectory_type: simulationState.trajectoryType,
+        num_points: simulationState.numPoints,
+        sampling_interval: 0.25,
+        noise_std_dev: activeScenario.noiseStdDevMeters,
+        dropout_rate: activeScenario.dropoutRate,
+        outlier_rate: 0.02,
+        outlier_magnitude: 5.0,
+        nlos_bias_mean: activeScenario.multipathBiasMeanMeters,
+        nlos_rate: simulationState.nlosRate,
+        target_z: 1.1,
+        solver: simulationState.selectedBackendSolver,
+        seed: simulationState.randomSeed,
+        room: {
+          width: activeScenario.room.width,
+          length: activeScenario.room.length,
+          height: activeScenario.room.height,
+        },
+        anchors: activeScenario.anchors.map((a) => ({
+          id: a.id,
+          x: a.x,
+          y: a.y,
+          z: a.z ?? 2.8,
+          is_active: a.isActive,
+        })),
+      });
+
+      const mappedTrajectory = mapSimulationToTrajectoryPoints(response);
+      set((state) => ({
+        trajectory: mappedTrajectory,
+        playbackIndex: 0,
+        simulationState: {
+          ...state.simulationState,
+          status: 'success',
+          dataSource: 'backend',
+          error: null,
+          validationErrors: null,
+          lastRunResponse: response,
+          activeAlgorithmName: response.algorithm_name,
+        },
+        systemHealth: {
+          ...state.systemHealth,
+          totalEstimationsComputed: state.systemHealth.totalEstimationsComputed + response.num_points,
+          lastHeartbeat: new Date().toLocaleTimeString(),
+        },
+      }));
+    } catch (err: unknown) {
+      const errorMsg = (err as Error)?.message || 'Positioning simulation failed';
+      const validationErrs = (err as { errors?: string[] })?.errors || null;
+      set((state) => ({
+        simulationState: {
+          ...state.simulationState,
+          status: 'error',
+          error: errorMsg,
+          validationErrors: validationErrs,
+        },
+      }));
+    }
+  },
+
+  resetToDemoTrajectory: () =>
+    set((state) => ({
+      trajectory: initialTrajectory,
+      playbackIndex: 0,
+      simulationState: {
+        ...state.simulationState,
+        status: 'idle',
+        dataSource: 'demo',
+        error: null,
+        validationErrors: null,
+        activeAlgorithmName: 'Deterministic Demo Baseline',
+      },
+    })),
+
+  benchmarkState: {
+    status: 'idle',
+    dataSource: 'demo',
+    error: null,
+    lastCompareResponse: null,
+  },
+
+  runBackendBenchmark: async () => {
+    const { activeScenario, simulationState } = get();
+    set((state) => ({
+      benchmarkState: { ...state.benchmarkState, status: 'loading', error: null },
+    }));
+
+    try {
+      const response = await apiClient.compareSimulations({
+        trajectory_type: simulationState.trajectoryType,
+        num_points: Math.min(simulationState.numPoints, 120),
+        sampling_interval: 0.25,
+        noise_std_dev: activeScenario.noiseStdDevMeters,
+        dropout_rate: activeScenario.dropoutRate,
+        nlos_bias_mean: activeScenario.multipathBiasMeanMeters,
+        nlos_rate: simulationState.nlosRate,
+        target_z: 1.1,
+        enable_kalman: true,
+        robust_loss: 'huber',
+        robust_f_scale: 0.5,
+        seed: simulationState.randomSeed,
+        room: {
+          width: activeScenario.room.width,
+          length: activeScenario.room.length,
+          height: activeScenario.room.height,
+        },
+        anchors: activeScenario.anchors.map((a) => ({
+          id: a.id,
+          x: a.x,
+          y: a.y,
+          z: a.z ?? 2.8,
+          is_active: a.isActive,
+        })),
+      });
+
+      set((state) => ({
+        benchmarkState: {
+          ...state.benchmarkState,
+          status: 'success',
+          dataSource: 'backend',
+          error: null,
+          lastCompareResponse: response,
+        },
+        systemHealth: {
+          ...state.systemHealth,
+          lastHeartbeat: new Date().toLocaleTimeString(),
+        },
+      }));
+    } catch (err: unknown) {
+      set((state) => ({
+        benchmarkState: {
+          ...state.benchmarkState,
+          status: 'error',
+          error: (err as Error)?.message || 'Benchmark comparison failed',
+        },
+      }));
+    }
+  },
 }));

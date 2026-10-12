@@ -26,6 +26,8 @@ export interface TrajectoryPoint {
   estimatedY: number; // Demonstration estimate Y (meters)
   estimatedZ: number; // Demonstration estimate Z (meters)
   errorMeters: number; // Euclidean distance between GT and estimate
+  status?: string; // Estimate status from solver (e.g. 'valid', 'poor_geometry', 'insufficient_measurements')
+  isDegraded?: boolean; // Whether the estimate is missing or degraded
 }
 
 export interface RangeMeasurement {

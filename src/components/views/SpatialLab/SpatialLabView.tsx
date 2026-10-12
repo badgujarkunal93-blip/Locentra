@@ -8,7 +8,7 @@ import { SpatialScene3D } from './SpatialScene3D';
 import { SpatialToolbar } from './SpatialToolbar';
 import { AnchorInspector } from './AnchorInspector';
 import { SpatialLegend } from './SpatialLegend';
-import { Info, ArrowRight } from 'lucide-react';
+import { Info, ArrowRight, CheckCircle2, RotateCcw } from 'lucide-react';
 
 export const SpatialLabView: React.FC = () => {
   const spatialViewMode = useAppStore((s) => s.spatialViewMode);
@@ -17,6 +17,9 @@ export const SpatialLabView: React.FC = () => {
   const stepPlayback = useAppStore((s) => s.stepPlayback);
   const resetPlayback = useAppStore((s) => s.resetPlayback);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
+
+  const simulationState = useAppStore((s) => s.simulationState);
+  const resetToDemoTrajectory = useAppStore((s) => s.resetToDemoTrajectory);
 
   // Trajectory Playback Timer Hook with Proper Cleanup
   useEffect(() => {
@@ -35,20 +38,48 @@ export const SpatialLabView: React.FC = () => {
     return () => clearInterval(timer);
   }, [isPlaying, playbackSpeed, stepPlayback]);
 
+  const isLiveBackend = simulationState.dataSource === 'backend';
+
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Illustrative Notice Banner */}
-      <div className="rounded-xl p-3 bg-slate-900/80 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      {/* Notice & Origin Banner */}
+      <div className={`rounded-xl p-3 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
+        isLiveBackend 
+          ? 'bg-slate-900/90 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+          : 'bg-slate-900/80 border-amber-500/30'
+      }`}>
         <div className="flex items-center gap-2.5">
-          <Info className="w-4 h-4 text-emerald-400 shrink-0" />
+          {isLiveBackend ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <Info className="w-4 h-4 text-amber-400 shrink-0" />
+          )}
           <span className="text-slate-300">
-            <strong className="text-emerald-300">Phase 2 Interactive Spatial Lab:</strong> Rendering coordinate-accurate 2D & 3D dual viewports from shared Zustand state. Estimated trajectory shown is an explicitly deterministic demonstration baseline.
+            {isLiveBackend && simulationState.lastRunResponse ? (
+              <>
+                <strong className="text-emerald-300">Live Positioning Trajectory:</strong> Computed by FastAPI backend solver <span className="font-mono font-bold text-emerald-200">{simulationState.lastRunResponse.algorithm_name}</span> ({simulationState.lastRunResponse.estimates.length} points | RMSE: {(simulationState.lastRunResponse.metrics.rmse_m ?? 0).toFixed(3)}m | Valid: {(simulationState.lastRunResponse.metrics.valid_estimate_rate * 100).toFixed(0)}%).
+              </>
+            ) : (
+              <>
+                <strong className="text-amber-300">Phase 2 Interactive Spatial Lab:</strong> Rendering coordinate-accurate 2D & 3D dual viewports. Estimated trajectory shown is an explicitly deterministic demonstration baseline.
+              </>
+            )}
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="illustrative" size="sm">
-            Deterministic Demo
+          <Badge variant={isLiveBackend ? 'mint' : 'illustrative'} size="sm">
+            {isLiveBackend ? `Live Engine: ${simulationState.selectedBackendSolver.toUpperCase()}` : 'Deterministic Demo'}
           </Badge>
+          {isLiveBackend && (
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={resetToDemoTrajectory}
+              leftIcon={<RotateCcw className="w-3 h-3" />}
+            >
+              Reset to Demo
+            </Button>
+          )}
           <Button
             size="xs"
             variant="secondary"
@@ -63,7 +94,7 @@ export const SpatialLabView: React.FC = () => {
       {/* Main Section Header */}
       <SectionHeader
         categoryTag="Spatial Intelligence"
-        phaseBadge="Phase 2 Live"
+        phaseBadge={isLiveBackend ? "Phase 5 Backend" : "Phase 2 Live"}
         title="Spatial Lab & Localisation Visualiser"
         subtitle="Coordinate-accurate 2D floor plan and lightweight 3D spatial room simulation synchronized through shared scenario state."
         className="pb-3 mb-3"

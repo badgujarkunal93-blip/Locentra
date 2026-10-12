@@ -227,18 +227,25 @@ const TargetAndTrajectories: React.FC = () => {
         </group>
       )}
 
-      {/* Demonstration Estimated Target Mesh */}
+      {/* Estimated Target Mesh (Mint for valid, Amber for degraded/failed) */}
       {showEstimated && (
         <group position={targetEstPos}>
           <mesh rotation={[0, Math.PI / 4, 0]}>
             <octahedronGeometry args={[0.2]} />
             <meshStandardMaterial
-              color="#34d399"
-              emissive="#10b981"
+              color={currentPoint.isDegraded ? "#f59e0b" : "#34d399"}
+              emissive={currentPoint.isDegraded ? "#d97706" : "#10b981"}
               emissiveIntensity={0.7}
               roughness={0.3}
             />
           </mesh>
+          {currentPoint.isDegraded && (
+            <Billboard position={[0, 0.35, 0]}>
+              <Text fontSize={0.18} color="#fbbf24" anchorX="center" anchorY="middle">
+                Degraded
+              </Text>
+            </Billboard>
+          )}
         </group>
       )}
 
