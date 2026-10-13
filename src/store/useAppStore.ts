@@ -10,6 +10,8 @@ interface AppState {
   // Navigation
   activeSection: NavigationSectionId;
   setActiveSection: (section: NavigationSectionId) => void;
+  viewMode: 'landing' | 'app';
+  setViewMode: (mode: 'landing' | 'app') => void;
 
   // System & Engine telemetry
   engineStatus: EngineStatus;
@@ -97,6 +99,13 @@ let benchRequestSeq = 0;
 export const useAppStore = create<AppState>((set, get) => ({
   activeSection: 'command-center',
   setActiveSection: (section) => set({ activeSection: section }),
+
+  viewMode: (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.MODE === 'test')
+    ? 'app'
+    : (typeof window !== 'undefined' && (window.location.search.includes('view=app') || window.location.hash === '#app'))
+      ? 'app'
+      : 'landing',
+  setViewMode: (mode) => set({ viewMode: mode }),
 
   engineStatus: 'online',
   setEngineStatus: (status) => set((state) => ({ 

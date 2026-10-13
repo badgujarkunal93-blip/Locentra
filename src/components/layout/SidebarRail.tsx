@@ -87,21 +87,28 @@ export const SidebarRail: React.FC = () => {
         isCollapsed ? 'w-20' : 'w-64 lg:w-72'
       )}
     >
-      {/* Brand Header */}
+      {/* Brand Header: Click to return to Landing Page */}
       <div className="flex items-center justify-between h-20 px-5 border-b border-white/10">
-        <div className="flex items-center gap-3.5 overflow-hidden">
-          <LocentraLogo size={40} variant="badge" />
+        <button
+          onClick={() => useAppStore.getState().setViewMode('landing')}
+          className="flex items-center gap-3.5 overflow-hidden text-left cursor-pointer group focus:outline-none rounded-xl py-1 px-1 -ml-1 transition-all hover:opacity-90"
+          title="Return to Locentra Landing Page"
+          aria-label="Return to Locentra Landing Page"
+        >
+          <div className="transition-transform duration-200 group-hover:scale-105 shrink-0">
+            <LocentraLogo size={40} variant="badge" />
+          </div>
           {!isCollapsed && (
             <div className="min-w-0">
-              <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
+              <span className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5 group-hover:text-[#D9F56F] transition-colors">
                 Locentra
               </span>
-              <p className="text-[11px] font-medium text-[#888888] truncate mt-0.5">
+              <p className="text-[11px] font-medium text-[#888888] truncate mt-0.5 group-hover:text-slate-300 transition-colors">
                 Spatial Intelligence
               </p>
             </div>
           )}
-        </div>
+        </button>
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}

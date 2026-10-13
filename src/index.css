@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@theme {
+  --color-locentra-lime: #D9F56F;
+  --color-locentra-charcoal: #232124;
+  --color-locentra-canvas: #F8F9FA;
+  --color-locentra-card: #FFFFFF;
+  --color-locentra-border: #EAEAEA;
+  --color-locentra-lavender: #DDD6F8;
+  --color-locentra-emerald: #10B981;
+  --color-locentra-amber: #F59E0B;
+}
+
 @layer base {
   :root {
     /* Exact Color System Tokens */
@@ -7,21 +18,21 @@
     --accent-lavender: #B6A9EF;
     --accent-purple-light: #DDD6F8;
     --surface-dark: #232124;
-    --surface-bg: #E6E6E6;
+    --surface-bg: #F8F9FA;
     --surface-card: #FFFFFF;
     --text-primary: #171717;
-    --text-secondary: #777777;
+    --text-secondary: #52525B;
     --border-subtle: #EAEAEA;
 
     /* Semantic Mappings */
-    --bg-main: #E6E6E6;
+    --bg-main: #F8F9FA;
     --bg-surface-charcoal: #232124;
     --border-tech: #EAEAEA;
     --border-tech-bright: #D9F56F;
     
     --signal-mint: #D9F56F;
-    --signal-cyan: #55A6FF;
-    --signal-violet: #B6A9EF;
+    --signal-cyan: #3B82F6;
+    --signal-violet: #8B5CF6;
     --signal-amber: #F59E0B;
     --signal-rose: #EF4444;
   }
@@ -32,7 +43,7 @@
   }
 
   body {
-    background-color: #E6E6E6;
+    background-color: #F8F9FA;
     color: #171717;
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
@@ -41,6 +52,76 @@
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
+}
+
+/* Neo-minimalist Human-Crafted Utilities */
+.locentra-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 20px;
+  box-shadow: 0 2px 14px -2px rgba(0, 0, 0, 0.04);
+}
+
+.locentra-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.locentra-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #D9F56F;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.08);
+}
+
+.locentra-card-dark {
+  background-color: #232124;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.12);
+}
+
+.locentra-card-lime {
+  background-color: #F8FDE8;
+  border: 1px solid #D9F56F;
+  border-radius: 20px;
+}
+
+.btn-lime {
+  background-color: #D9F56F;
+  color: #171717;
+  font-weight: 700;
+  border: 1px solid rgba(35, 33, 36, 0.12);
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-lime:hover {
+  background-color: #cbf052;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px -2px rgba(217, 245, 111, 0.6);
+}
+
+.btn-dark {
+  background-color: #232124;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-dark:hover {
+  background-color: #171717;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px -2px rgba(35, 33, 36, 0.2);
+}
+
+.badge-lime {
+  background-color: #F8FDE8;
+  color: #232124;
+  border: 1px solid #D9F56F;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
 }
 
 /* Neo-minimalist Premium Card Styles */

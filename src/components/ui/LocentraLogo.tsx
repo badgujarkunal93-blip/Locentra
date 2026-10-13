@@ -3,7 +3,7 @@ import React from 'react';
 interface LocentraLogoProps {
   size?: number;
   className?: string;
-  variant?: 'badge' | 'icon';
+  variant?: 'badge' | 'icon' | 'neon';
 }
 
 /**
@@ -15,6 +15,72 @@ export const LocentraLogo: React.FC<LocentraLogoProps> = ({
   className = '',
   variant = 'badge',
 }) => {
+  if (variant === 'neon') {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`shrink-0 select-none ${className}`}
+        aria-label="Locentra Logo"
+      >
+        <defs>
+          <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#00F0FF" />
+            <stop offset="100%" stopColor="#0070F3" />
+          </linearGradient>
+          <radialGradient id="neonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#07090E" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="40" height="40" rx="12" fill="#0F141C" stroke="url(#neonGradient)" strokeWidth="1.5" />
+        <circle cx="20" cy="20" r="14" fill="url(#neonGlow)" />
+        <circle
+          cx="20"
+          cy="20"
+          r="14"
+          stroke="#00F0FF"
+          strokeWidth="1.2"
+          strokeDasharray="3 2"
+          strokeOpacity="0.4"
+        />
+        <circle
+          cx="20"
+          cy="20"
+          r="8.5"
+          stroke="#00F0FF"
+          strokeWidth="1.5"
+          strokeOpacity="0.8"
+        />
+        <path
+          d="M 20 6 L 20 12"
+          stroke="#00F0FF"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 32 27 L 26.5 24"
+          stroke="#00F0FF"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 8 27 L 13.5 24"
+          stroke="#00F0FF"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <circle cx="20" cy="6" r="2" fill="#00F0FF" />
+        <circle cx="32" cy="27" r="2" fill="#00F0FF" />
+        <circle cx="8" cy="27" r="2" fill="#00F0FF" />
+        <circle cx="20" cy="20" r="3.75" fill="#00F0FF" />
+        <circle cx="20" cy="20" r="1.5" fill="#07090E" />
+      </svg>
+    );
+  }
   if (variant === 'icon') {
     return (
       <svg

@@ -28,13 +28,18 @@ export const TopStatusBar: React.FC = () => {
 
   return (
     <header className="h-20 bg-transparent px-4 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20">
-      {/* Left: Brand / Module Breadcrumb */}
+      {/* Left: Brand / Module Breadcrumb - Clickable to Landing Page */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono uppercase tracking-wider font-bold text-[#171717] flex items-center gap-1.5 shrink-0">
-            <LocentraLogo size={16} variant="icon" className="text-[#171717]" />
-            Locentra
-          </span>
+          <button
+            onClick={() => useAppStore.getState().setViewMode('landing')}
+            className="text-xs font-mono uppercase tracking-wider font-bold text-[#171717] flex items-center gap-1.5 shrink-0 hover:text-black transition-opacity cursor-pointer group focus:outline-none p-1 -m-1 rounded-lg hover:bg-black/5"
+            title="Return to Landing Page"
+            aria-label="Return to Locentra Landing Page"
+          >
+            <LocentraLogo size={16} variant="icon" className="text-[#171717] group-hover:scale-110 transition-transform" />
+            <span>Locentra</span>
+          </button>
           <span className="text-[#A0A0A0] font-mono text-xs">/</span>
           <span className="text-sm font-bold text-[#171717] truncate">
             {sectionTitles[activeSection] || 'Platform'}

@@ -7,6 +7,7 @@ import { SpatialLabView } from './components/views/SpatialLab/SpatialLabView';
 import { ScenarioStudioPlaceholder } from './components/views/ScenarioStudio/ScenarioStudioPlaceholder';
 import { BenchmarkArenaPlaceholder } from './components/views/BenchmarkArena/BenchmarkArenaPlaceholder';
 import { DatasetExplorerPlaceholder } from './components/views/DatasetExplorer/DatasetExplorerPlaceholder';
+import { LandingPageView } from './components/landing/LandingPageView';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,6 +20,16 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   const activeSection = useAppStore((s) => s.activeSection);
+  const viewMode = useAppStore((s) => s.viewMode);
+  const setViewMode = useAppStore((s) => s.setViewMode);
+
+  if (viewMode === 'landing') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <LandingPageView onLaunchEngine={() => setViewMode('app')} />
+      </QueryClientProvider>
+    );
+  }
 
   const renderActiveSection = () => {
     switch (activeSection) {
