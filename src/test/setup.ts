@@ -25,6 +25,29 @@ Object.defineProperty(window, 'matchMedia', {
 // Canvas WebGL Mock for Three.js in jsdom
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
 HTMLCanvasElement.prototype.getContext = function (contextType: string, ...args: any[]) {
+  if (contextType === '2d') {
+    return {
+      canvas: this,
+      clearRect: () => {},
+      fillRect: () => {},
+      beginPath: () => {},
+      closePath: () => {},
+      fill: () => {},
+      stroke: () => {},
+      save: () => {},
+      restore: () => {},
+      translate: () => {},
+      rotate: () => {},
+      scale: () => {},
+      arc: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      bezierCurveTo: () => {},
+      createImageData: () => ({ data: [] }),
+      getImageData: () => ({ data: [] }),
+      putImageData: () => {},
+    } as any;
+  }
   if (contextType === 'webgl' || contextType === 'webgl2') {
     return {
       canvas: this,

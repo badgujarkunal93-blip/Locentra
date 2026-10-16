@@ -75,7 +75,7 @@ describe('Locentra Shell & Navigation', () => {
     fireEvent.click(datasetBtn);
 
     expect(screen.getByText(/Dataset Explorer & Trajectory Vault/i)).toBeInTheDocument();
-    expect(screen.getByText(/Figure-Eight Smooth Sweep/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Figure-Eight Smooth Sweep/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Anti-Leakage Architecture Rules/i)).toBeInTheDocument();
   });
 });

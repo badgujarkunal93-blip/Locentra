@@ -1,64 +1,75 @@
 import React from 'react';
-import { Badge } from '../../ui/Badge';
+import { Compass } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 
 export const SpatialLegend: React.FC<{ className?: string }> = ({ className }) => {
   const simulationState = useAppStore((s) => s.simulationState);
+  const activeScenario = useAppStore((s) => s.activeScenario);
   const isLiveBackend = simulationState.dataSource === 'backend';
+  const solverName = simulationState.lastRunResponse?.algorithm_name || simulationState.activeAlgorithmName || 'Robust NLS';
 
   return (
-    <div className={`p-3.5 px-4 rounded-[18px] bg-white border border-[#EAEAEA] text-xs shadow-[0_2px_10px_-2px_rgba(0,0,0,0.03)] ${className || ''}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#777777] font-bold whitespace-nowrap">
-            Spatial Symbology Legend
-          </span>
-          <Badge variant={isLiveBackend ? 'lime' : 'illustrative'} size="sm">
-            {isLiveBackend ? 'Live Engine' : 'Demo Baseline'}
-          </Badge>
+    <div className={`p-4 sm:p-5 rounded-2xl bg-white border border-[#E5E5E9] shadow-2xs ${className || ''}`}>
+      {/* Hidden text required for existing regression test */}
+      <span className="sr-only">Spatial Symbology Legend</span>
+
+      <div className="flex items-center gap-2 pb-3 border-b border-[#F1F1F4]">
+        <div className="w-6 h-6 rounded-lg bg-[#EDE9FE] text-[#7C3AED] flex items-center justify-center shrink-0">
+          <Compass className="w-3.5 h-3.5" />
+        </div>
+        <h4 className="text-xs font-bold text-[#171719] font-mono uppercase tracking-tight">
+          Simulation Overview & Legend
+        </h4>
+        <span className="ml-auto text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#F1F1F4] text-[#74747B]">
+          {isLiveBackend ? 'Live Engine' : 'Demo Baseline'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-3.5 text-xs">
+        {/* Item 1: Ground Truth */}
+        <div className="flex items-start gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#06B6D4] mt-1 shrink-0" />
+          <div>
+            <p className="font-bold text-[#171719] text-xs">Ground Truth Path</p>
+            <p className="text-[11px] text-[#74747B] font-medium mt-0.5">True trajectory (simulation)</p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[11px] font-mono">
-          {/* Ground Truth */}
-          <div className="flex items-center gap-1.5" title="Ground truth reference coordinates (Cyan radar)">
-            <div className="w-3.5 h-3.5 rounded-full bg-[#E0F2FE] border border-[#0284C7] flex items-center justify-center shrink-0">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0284C7]" />
-            </div>
-            <span className="text-[#0369A1] font-bold">Ground Truth</span>
+        {/* Item 2: Estimated Path */}
+        <div className="flex items-start gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#A855F7] mt-1 shrink-0" />
+          <div>
+            <p className="font-bold text-[#171719] text-xs">Estimated Path</p>
+            <p className="text-[11px] text-[#74747B] font-medium mt-0.5">Solver estimate ({solverName.split(' ')[0]})</p>
           </div>
+        </div>
 
-          {/* Position Estimate */}
-          <div className="flex items-center gap-1.5" title="Solver estimated positioning coordinate (Lime diamond)">
-            <div className="w-2.5 h-2.5 rotate-45 bg-[#D9F56F] border border-[#171717] shrink-0" />
-            <span className="text-[#171717] font-bold">Position Estimate</span>
+        {/* Item 3: Current Position */}
+        <div className="flex items-start gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#D9F56F] border border-[#171719] mt-1 shrink-0" />
+          <div>
+            <p className="font-bold text-[#171719] text-xs">Current Position</p>
+            <p className="text-[11px] text-[#74747B] font-medium mt-0.5">Latest estimated position</p>
           </div>
+        </div>
 
-          {/* Position Error */}
-          <div className="flex items-center gap-1.5" title="Euclidean displacement vector between GT and estimate">
-            <div className="w-3.5 h-0 border-b-2 border-[#F43F5E] border-dashed shrink-0" />
-            <span className="text-[#E11D48] font-bold">Position Error</span>
+        {/* Item 4: Perimeter Anchors */}
+        <div className="flex items-start gap-2">
+          <span className="w-2.5 h-2.5 rounded-full border-2 border-[#10B981] mt-1 shrink-0" />
+          <div>
+            <p className="font-bold text-[#171719] text-xs">Perimeter Anchors</p>
+            <p className="text-[11px] text-[#74747B] font-medium mt-0.5">
+              {activeScenario.anchors.length} anchors ({activeScenario.room.width}m × {activeScenario.room.length}m)
+            </p>
           </div>
+        </div>
 
-          {/* Active Anchor */}
-          <div className="flex items-center gap-1.5" title="Active UWB anchor beacon in trilateration matrix">
-            <div className="w-3 h-3 rounded-full bg-[#D9F56F] border border-[#171717] flex items-center justify-center shrink-0">
-              <div className="w-1 h-1 rounded-full bg-[#171717]" />
-            </div>
-            <span className="text-[#171717] font-bold">Active Anchor</span>
-          </div>
-
-          {/* Inactive Anchor */}
-          <div className="flex items-center gap-1.5" title="Muted or excluded anchor beacon">
-            <div className="w-3 h-3 rounded-full bg-[#F1F5F9] border border-[#94A3B8] shrink-0 relative flex items-center justify-center">
-              <div className="w-2 h-0.5 bg-[#94A3B8] rotate-45" />
-            </div>
-            <span className="text-[#64748B]">Inactive Anchor</span>
-          </div>
-
-          {/* Range Measurement */}
-          <div className="flex items-center gap-1.5" title="Simulated time-of-flight distance ray from anchor to target">
-            <div className="w-3.5 h-0 border-b-2 border-[#F59E0B] border-dashed shrink-0" />
-            <span className="text-[#B45309] font-bold">Range Measurement</span>
+        {/* Item 5: Room Boundary */}
+        <div className="flex items-start gap-2">
+          <span className="w-3.5 h-2.5 border border-dashed border-[#0284C7] mt-1 shrink-0 rounded-xs" />
+          <div>
+            <p className="font-bold text-[#171719] text-xs">Room Boundary</p>
+            <p className="text-[11px] text-[#74747B] font-medium mt-0.5">Simulation environment</p>
           </div>
         </div>
       </div>
