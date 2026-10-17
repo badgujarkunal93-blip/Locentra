@@ -29,6 +29,65 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
   const resetToDemoTrajectory = useAppStore((s) => s.resetToDemoTrajectory);
   const syncBackendConfig = useAppStore((s) => s.syncBackendConfig);
 
+  const PRESETS = [
+    {
+      id: 'clean',
+      name: 'Clean Signals',
+      badge: 'Lab Benchmark',
+      desc: 'Minimal Gaussian noise (σ = 0.05m), 0% dropout, no obstacles.',
+      noise: 0.05,
+      dropout: 0.00,
+      bias: 0.00,
+      nlosRate: 0.00,
+      seed: 42,
+    },
+    {
+      id: 'high-noise',
+      name: 'High Noise',
+      badge: 'RF Jitter',
+      desc: 'Heavy measurement noise (σ = 0.50m) with direct line-of-sight.',
+      noise: 0.50,
+      dropout: 0.05,
+      bias: 0.00,
+      nlosRate: 0.00,
+      seed: 101,
+    },
+    {
+      id: 'missing-anchors',
+      name: 'Missing Anchors',
+      badge: 'Dropout Stress',
+      desc: '30% packet loss causing intermittent loss of visible anchors.',
+      noise: 0.15,
+      dropout: 0.30,
+      bias: 0.00,
+      nlosRate: 0.00,
+      seed: 202,
+    },
+    {
+      id: 'combined-stress',
+      name: 'Combined Stress',
+      badge: 'Multi-Degradation',
+      desc: 'High noise (σ = 0.35m), 20% dropouts, and +0.80m NLOS wall delay bias.',
+      noise: 0.35,
+      dropout: 0.20,
+      bias: 0.80,
+      nlosRate: 0.25,
+      seed: 303,
+    },
+  ];
+
+  const handleApplyPreset = (preset: typeof PRESETS[0]) => {
+    updateScenario({
+      noiseStdDevMeters: preset.noise,
+      dropoutRate: preset.dropout,
+      multipathBiasMeanMeters: preset.bias,
+    });
+    setSimulationConfig({
+      randomSeed: preset.seed,
+      nlosRate: preset.nlosRate,
+    });
+  };
+
   const handleNoiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateScenario({ noiseStdDevMeters: parseFloat(e.target.value) });
   };
@@ -199,6 +258,36 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
             </CardHeader>
 
             <div className="space-y-6">
+              {/* Ready-Made Experiment Presets */}
+              <div className="space-y-2 pb-3 border-b border-[#EAEAEA]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-[#171717] uppercase tracking-wider">
+                    Ready-Made Experiment Presets
+                  </span>
+                  <span className="text-[11px] text-[#71717A]">Click to load reproducible parameters</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleApplyPreset(preset)}
+                      className="p-3 rounded-xl border border-[#EAEAEA] bg-[#F8F9FA] hover:bg-[#F8FDE8] hover:border-[#D9F56F] text-left transition-all cursor-pointer group"
+                    >
+                      <div className="text-xs font-bold text-[#171717] group-hover:text-black">
+                        {preset.name}
+                      </div>
+                      <div className="text-[10px] font-mono text-[#71717A] mt-0.5">
+                        {preset.badge}
+                      </div>
+                      <div className="text-[10px] text-[#52525B] mt-1 leading-snug line-clamp-2">
+                        {preset.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Solver & Trajectory Selection Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="space-y-1.5">
@@ -296,9 +385,12 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* Noise Std Dev */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-[#171717]">
-                    Gaussian Range Noise (AWGN)
-                  </span>
+                  <div>
+                    <span className="font-bold text-[#171717]">
+                      Distance Measurement Noise (Gaussian σ)
+                    </span>
+                    <p className="text-[11px] text-[#52525B]">Random Gaussian jitter simulating thermal and RF noise.</p>
+                  </div>
                   <span className="font-mono text-[#171717] font-extrabold">
                     σ = {activeScenario.noiseStdDevMeters.toFixed(2)} m
                   </span>
@@ -323,9 +415,12 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* Dropout Rate */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-[#171717]">
-                    Intermittent Packet Dropout / Missing Observations
-                  </span>
+                  <div>
+                    <span className="font-bold text-[#171717]">
+                      Intermittent Packet Dropout / Missing Anchors
+                    </span>
+                    <p className="text-[11px] text-[#52525B]">Packet loss rate simulating signals blocked by moving obstacles.</p>
+                  </div>
                   <span className="font-mono text-[#171717] font-extrabold">
                     {(activeScenario.dropoutRate * 100).toFixed(0)} %
                   </span>
@@ -350,9 +445,12 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {/* NLOS Positive Bias */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-[#171717]">
-                    Non-Line-of-Sight (NLOS) Exponential Bias & Probability
-                  </span>
+                  <div>
+                    <span className="font-bold text-[#171717]">
+                      Non-Line-of-Sight (NLOS) Wall Delay Bias
+                    </span>
+                    <p className="text-[11px] text-[#52525B]">Systematic positive shift added when radio signals penetrate drywall or bounce.</p>
+                  </div>
                   <span className="font-mono text-amber-700 font-extrabold">
                     {(simulationState.nlosRate * 100).toFixed(0)}% rate | μ = +{activeScenario.multipathBiasMeanMeters.toFixed(2)} m
                   </span>
