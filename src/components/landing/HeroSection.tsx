@@ -73,8 +73,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               <button
                 onClick={() => {
-                  const el = document.getElementById('how-it-works') || document.getElementById('architecture');
-                  el?.scrollIntoView({ behavior: 'smooth' });
+                  if (onExploreArchitecture) {
+                    onExploreArchitecture();
+                  } else {
+                    const el = document.getElementById('how-it-works') || document.getElementById('architecture');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }}
                 className="px-5 py-3 rounded-xl bg-white border border-[#EAEAEA] hover:border-slate-400 text-xs sm:text-sm font-bold text-[#171717] transition-all cursor-pointer shadow-2xs flex items-center gap-2"
               >

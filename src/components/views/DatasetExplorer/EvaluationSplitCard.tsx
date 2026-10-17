@@ -117,9 +117,9 @@ export const EvaluationSplitCard: React.FC<EvaluationSplitCardProps> = ({ datase
       </div>
 
       {/* Footer Info */}
-      <div className="pt-2 border-t border-[#F0F0F3] text-[10px] text-[#74747B] flex items-center justify-between">
-        <span>Evaluates unseen testing paths</span>
-        <span className="font-mono text-[#171719] font-bold">Zero-overlap guarantee</span>
+      <div className="pt-2 border-t border-[#F0F0F3] text-[10px] text-[#74747B] flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <span>Synthetic partition: Isolated RNG seeds ensure zero waypoint overlap between splits</span>
+        <span className="font-mono text-[#171719] font-bold">Held-out testing sequence</span>
       </div>
     </div>
   );

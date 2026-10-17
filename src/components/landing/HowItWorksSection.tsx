@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { 
   Compass, 
   WifiOff, 
-  Cpu, 
-  BarChart3, 
   ArrowRight, 
   ShieldAlert, 
   Radio, 
-  Layers,
   Sparkles,
   CheckCircle2
 } from 'lucide-react';

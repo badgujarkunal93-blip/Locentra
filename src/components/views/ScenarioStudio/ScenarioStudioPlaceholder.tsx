@@ -387,7 +387,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                 <div className="flex justify-between items-center text-xs">
                   <div>
                     <span className="font-bold text-[#171717]">
-                      Distance Measurement Noise (Gaussian σ)
+                      Distance Measurement Noise (Gaussian Range Noise σ)
                     </span>
                     <p className="text-[11px] text-[#52525B]">Random Gaussian jitter simulating thermal and RF noise.</p>
                   </div>

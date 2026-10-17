@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, CheckCheck, BookOpen, Terminal, Network, Cpu, Code2 } from 'lucide-react';
+import { X, Copy, CheckCheck, BookOpen, Terminal, Network, Cpu } from 'lucide-react';
 
 interface DocumentationModalProps {
   isOpen: boolean;

@@ -1,97 +1,148 @@
-# Locentra — Indoor Positioning Platform
+# Locentra — Indoor Localisation Research & Simulation Platform
 
-Locentra is a spatial-intelligence command centre and indoor localisation research platform. It is engineered to analyse and estimate 2D indoor target coordinates from noisy, missing, or multipath-biased reference-point range measurements (e.g. UWB/ToF anchors), model non-line-of-sight (NLOS) degradations, and benchmark mathematical positioning solvers alongside machine learning residual calibration.
+Locentra is an interactive indoor-positioning research and simulation platform designed to evaluate how numerical positioning algorithms perform when wireless distance measurements are noisy, missing, or distorted by obstacles.
+
+Indoor positioning technologies such as Ultra-Wideband (UWB) and Bluetooth Low Energy (BLE) estimate coordinates from time-of-flight (ToF) or received signal strength (RSS). However, real-world indoor environments introduce multipath reflections, non-line-of-sight (NLOS) wall attenuation, packet dropouts, and geometric dilution of precision. Locentra provides a reproducible, controlled virtual laboratory to stress-test positioning solvers before deploying physical hardware.
+
+---
+
+## What Locentra Does
+
+1. **Configures a Virtual Environment**: Sets up 2D and 3D indoor room dimensions, fixed reference anchors ($A_1 \dots A_6$), and ground-truth target trajectories (figure-eights, corridors, random walks).
+2. **Simulates Unreliable Wireless Measurements**: Introduces controlled Gaussian measurement noise ($\sigma$), stochastic packet loss (dropout rate), obstacle-induced positive NLOS bias, and gross outlier spikes.
+3. **Executes Numerical Solvers**: Calculates target position estimates using Ordinary Non-Linear Least Squares (NLS), Robust Huber M-estimation, and Kinematic Kalman motion filtering.
+4. **Evaluates Benchmark Metrics**: Quantifies localisation error using Root Mean Squared Error (RMSE), Mean/Median error, 95th Percentile (P95) error, and valid-estimate success rates under identical seeds.
+
+---
+
+## Implemented Capabilities vs. Planned Research
+
+| Component | Current Implementation Status | Notes |
+| :--- | :--- | :--- |
+| **Virtual Environment** | **Implemented** | Configurable 2D/3D room geometries, anchor layouts, and continuous target trajectories. |
+| **Synthetic Measurement Simulator** | **Implemented** | Python engine modelling range noise, dropout, NLOS positive bias, and outliers. |
+| **Nonlinear Least Squares (NLS)** | **Implemented** | Standard numerical optimization via SciPy Levenberg-Marquardt / Trust Region Reflective. |
+| **Robust Huber M-Estimation** | **Implemented** | Downweights large measurement residuals ($\delta=1.345$) to resist severe outlier contamination. |
+| **Kinematic Kalman Filtering** | **Implemented** | Constant-velocity state-space motion model filtering spatial jitter and bridging dropouts. |
+| **Multi-Solver Benchmark API** | **Implemented** | FastAPI endpoint comparing all 4 solver configurations on identical synthetic observations. |
+| **Interactive Frontend** | **Implemented** | Command Center, 2D/3D Spatial Lab, Scenario Studio, Benchmark Arena, and Dataset Explorer. |
+| **Physical Sensor Feed** | *Planned Roadmap* | Real hardware transceivers (UWB / BLE serial or MQTT pipelines) planned for future phase. |
+| **Trained ML Residual Model** | *Planned Roadmap* | Learned deep neural network residual correction model planned after physical dataset acquisition. |
+| **Uncertainty Covariance Reporting**| *Planned Roadmap* | Formal covariance ellipse output under research verification. |
 
 > [!NOTE]
-> **Demonstration Baseline Notice:** The spatial trajectory and positional estimates currently rendered in the Phase 1 & Phase 2 interface represent deterministic baseline demonstration data designed for spatial validation and UI verification. The numerical localisation algorithms (Trilateration, Non-linear Least Squares, and Extended Kalman Filter) and stochastic measurement models are scheduled for Phase 3 integration.
+> **Synthetic Data & Research Scope:** Locentra is a research prototype. All measurements currently visualised and computed are generated using mathematical simulation models. Positioning accuracy metrics must always be evaluated alongside valid-estimate rates. Under certain sparse or near-collinear anchor geometries, robust estimators can experience gradient flattening and perform worse than ordinary least squares—a known mathematical boundary documented in our research.
 
 ---
 
-## Current Features (Phase 1 + Phase 2)
+## Technical Architecture
 
-- **Command Center**: Real-time telemetry dashboard, engine health monitor, scenario overview, and quick-action run panel.
-- **Spatial Lab (2D Floor Plan)**:
-  - Metric coordinate-accurate SVG floor plan with room boundaries and 1m/2m grid markings.
-  - Anchor beacon nodes (A1–A6) with active/inactive indicators, selection ring, and live coordinates.
-  - Simultaneous ground truth (cyan) and demonstration estimate (mint) paths.
-  - Active range measurement rays and real-time error displacement vectors.
-- **Spatial Lab (3D Scene)**:
-  - Interactive 3D spatial room model powered by Three.js, React Three Fiber, and Drei.
-  - 3D anchor transceivers with ceiling mounts, beacon lights, and billboard labels.
-  - 3D trajectory visualization with synchronized playback, orbit, pan, zoom, and perspective/top-down camera presets.
-- **Interactive Controls & Playback Toolbar**:
-  - Play/pause, step forward, reset, timeline scrubber, and 0.5x / 1.0x / 2.0x playback speed toggles.
-  - Layer toggles for ground truth, estimated path, anchor labels, and range rays.
-  - Instant anchor activation/deactivation reflected synchronously across 2D and 3D views.
-- **Scenario Studio (Preview)**: Scenario configuration workspace with room dimensions, anchor layout, and noise parameter controls.
-- **Benchmark Arena (Preview)**: Solver evaluation workbench with empirical error CDF charts and accuracy comparison tables.
-- **Dataset Explorer (Preview)**: Experimental telemetry capture viewer with filtering and CSV/JSON export capabilities.
-
----
-
-## Technology Stack
-
-- **Framework & Runtime**: React 19, TypeScript 5.7, Vite 6
-- **Styling**: Tailwind CSS v4, custom technical glassmorphism design system
-- **3D Visualization**: Three.js, `@react-three/fiber`, `@react-three/drei`
-- **Charts & Data**: Recharts, D3
-- **State Management**: Zustand v5
-- **Data Fetching**: TanStack React Query v5
-- **Icons & Animation**: Lucide React, Motion
-- **Testing**: Vitest, React Testing Library, jsdom
-
----
-
-## Local Development
-
-### Prerequisites
-- Node.js v18+ (tested on Node.js v22)
-- npm v10+
-
-### Commands
-```bash
-# Install dependencies
-npm install
-
-# Start local development server (runs on http://localhost:5173)
-npm run dev
-
-# Run Vitest test suite (12/12 passing unit & integration tests)
-npm test
-
-# Build production bundle
-npm run build
-
-# Preview production build locally
-npm run preview
+```
+┌────────────────────────────────────────────────────────┐
+│             Locentra Frontend (React 19)               │
+│  Command Center · Spatial Lab · Scenario · Benchmark   │
+└──────────────────────────┬─────────────────────────────┘
+                           │ HTTP REST (JSON)
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│             FastAPI Backend (anchorsense)              │
+│  /api/v1/simulations/run · /api/v1/simulations/compare │
+└─────────────┬────────────────────────────┬─────────────┘
+              ▼                            ▼
+┌───────────────────────────┐┌───────────────────────────┐
+│   Measurement Simulator   ││    Positioning Solvers    │
+│  • Gaussian Channel Noise ││  • Ordinary NLS           │
+│  • Stochastic Dropout     ││  • Robust Huber NLS       │
+│  • NLOS Positive Bias     ││  • Kinematic Kalman       │
+│  • Outlier Injections     ││  • Combined Huber+Kalman  │
+└───────────────────────────┘└───────────────────────────┘
 ```
 
 ---
 
-## Vercel Deployment
+## Backend REST API Endpoints
 
-This project is configured for seamless deployment on [Vercel](https://vercel.com):
+The backend is built with **FastAPI** and is located in `backend/anchorsense`:
 
-1. **Framework Preset**: Vite
-2. **Build Command**: `npm run build`
-3. **Output Directory**: `dist`
-4. **Root Directory**: `./`
-5. **SPA Rewrites**: Configured via `vercel.json` to route all direct URL navigation and refreshes to `/index.html`.
+- `GET /health`: Health status of the API engine and solver modules.
+- `POST /api/v1/simulations/run`: Executes a single-solver simulation for a specified trajectory, anchor set, noise level, dropout rate, and NLOS configuration.
+- `POST /api/v1/simulations/compare`: Runs an apples-to-apples comparison of all four solvers (`nls`, `robust_nls`, `nls_kalman`, `robust_nls_kalman`) across identical synthetic observations and returns comparative RMSE, P95, and valid-estimate statistics.
 
-### Deploying via GitHub Integration
-1. Push repository to GitHub: `https://github.com/badgujarkunal93-blip/Locentra.git`
-2. In the [Vercel Dashboard](https://vercel.com/new), select **Import Git Repository**.
-3. Choose the `Locentra` repository.
-4. Verify the framework is detected as **Vite** and output directory as `dist`.
-5. Click **Deploy**.
+### Example Request (`POST /api/v1/simulations/run`)
+
+```python
+import requests
+
+payload = {
+    "scenario_id": "warehouse_combined_stress",
+    "solver_type": "robust_nls_kalman",
+    "noise_std_meters": 0.35,
+    "dropout_rate": 0.15,
+    "nlos_probability": 0.20,
+    "nlos_bias_meters": 2.5,
+    "seed": 42
+}
+
+response = requests.post("http://localhost:8000/api/v1/simulations/run", json=payload)
+data = response.json()
+print("RMSE:", data["metrics"]["rmse_meters"])
+print("Valid Rate:", data["metrics"]["valid_estimate_rate"])
+```
 
 ---
 
-## Roadmap
+## Local Development & Setup
 
-- [x] **Phase 1: Frontend Shell and Visual System** (Completed)
-- [x] **Phase 2: Interactive 2D/3D Spatial Environment** (Completed)
-- [ ] **Phase 3: Python Simulator and Positioning Algorithms** (Pending)
-- [ ] **Phase 4: ML Correction and Benchmark Suite** (Pending)
-- [ ] **Phase 5: API Integration and Functional Controls** (Pending)
-- [ ] **Phase 6: Production Hardening, Documentation and Final Release** (Pending)
+### Prerequisites
+- **Node.js**: v18+ (tested on v22)
+- **Python**: 3.10+ (tested with `uv` and standard `python3 -m venv`)
+
+### 1. Frontend Setup
+```bash
+# Install dependencies
+npm install
+
+# Start Vite development server (http://localhost:5173)
+npm run dev
+
+# Run Vitest test suite (62 passing tests)
+npm test -- --run
+
+# Build production bundle
+npm run build
+```
+
+### 2. Backend Setup
+```bash
+cd backend
+
+# Create virtual environment and install dependencies
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Start FastAPI server on port 8000
+uvicorn anchorsense.api.app:app --reload --host 0.0.0.0 --port 8000
+
+# Run Pytest suite (102 passing tests)
+pytest tests/
+```
+
+---
+
+## Project Roadmap
+
+- [x] **Phase 1: Research Platform Core & Design System** (Completed)
+- [x] **Phase 2: Interactive 2D/3D Spatial Environment & Synchronized Playback** (Completed)
+- [x] **Phase 3: Python Positioning Engine & Synthetic Measurement Simulator** (Completed)
+- [x] **Phase 4: Multi-Solver Comparative Benchmarking (NLS, Huber, Kalman)** (Completed)
+- [x] **Phase 5: Transparent Research Audit & Clear Scientific Copy** (Completed)
+- [ ] **Phase 6: Physical Transceiver Ingestion (BLE / UWB Serial & MQTT)** (Planned)
+- [ ] **Phase 7: Machine Learning Deep Residual Correction on Real-World Data** (Planned)
+- [ ] **Phase 8: Formal Covariance & Uncertainty Ellipse Computation** (Planned)
+
+---
+
+## License & Citation
+
+Locentra is open-source research software developed for transparent evaluation of indoor positioning algorithms. Contributions and academic discussions are welcome via [GitHub Issues](https://github.com/badgujarkunal93-blip/Locentra/issues).
