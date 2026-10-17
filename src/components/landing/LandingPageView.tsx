@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LandingHeader } from './LandingHeader';
 import { HeroSection } from './HeroSection';
+import { HowItWorksSection } from './HowItWorksSection';
 import { ArchitectureSection } from './ArchitectureSection';
 import { ScrollytellingSection } from './ScrollytellingSection';
 import { UniquenessSection } from './UniquenessSection';
@@ -56,11 +57,14 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onLaunchEngine
         <HeroSection 
           onLaunchEngine={onLaunchEngine}
           onExploreArchitecture={() => {
-            document.getElementById('architecture')?.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
 
-        {/* Section 2: Tabbed Technical Architecture Deep Dive */}
+        {/* Section 2: How It Works & Problem Explanation */}
+        <HowItWorksSection onLaunchSimulator={onLaunchEngine} />
+
+        {/* Section 3: Tabbed Technical Architecture Deep Dive */}
         <ArchitectureSection initialTab={selectedTech} />
 
         {/* Section 3: 3D Scroll-Triggered Zone Showcase */}

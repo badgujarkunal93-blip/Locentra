@@ -36,7 +36,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({
             </div>
 
             <p className="text-[#52525B] text-xs leading-relaxed max-w-sm">
-              Algorithmic positioning engine built for NLOS resilience, real-time outlier suppression, and zero-leakage trajectory tracking in GPS-denied environments.
+              Algorithmic positioning research platform evaluating NLOS resilience, robust Huber M-estimation, and kinematic trajectory tracking in GPS-denied environments.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -84,10 +84,10 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({
             <ul className="space-y-2">
               <li>
                 <button 
-                  onClick={onLaunchEngine || (() => window.open('https://locentra.app', '_blank'))}
+                  onClick={onLaunchEngine}
                   className="hover:text-[#171717] transition-colors text-left cursor-pointer"
                 >
-                  Locentra Engine v2.4
+                  Locentra Simulator
                 </button>
               </li>
               <li>
@@ -95,7 +95,7 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({
                   onClick={onOpenDocs} 
                   className="hover:text-[#171717] transition-colors text-left cursor-pointer"
                 >
-                  C++ &amp; Python SDKs
+                  Python Numerical Engine
                 </button>
               </li>
               <li>
@@ -103,17 +103,17 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({
                   onClick={onOpenDocs} 
                   className="hover:text-[#171717] transition-colors text-left cursor-pointer"
                 >
-                  REST &amp; WebSocket API
+                  FastAPI REST Engine
                 </button>
               </li>
               <li>
-                <a href="#hero" className="hover:text-[#171717] transition-colors">
-                  System Requirements
+                <a href="#how-it-works" className="hover:text-[#171717] transition-colors">
+                  Simulation Workflow
                 </a>
               </li>
               <li>
-                <a href="#hero" className="hover:text-[#171717] transition-colors">
-                  Firmware Bridges
+                <a href="#architecture" className="hover:text-[#171717] transition-colors">
+                  Solver Architecture
                 </a>
               </li>
             </ul>
@@ -154,12 +154,12 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({
             </div>
             <ul className="space-y-2">
               <li><a href="#contact" className="hover:text-[#171717] transition-colors">About Locentra</a></li>
-              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Security &amp; SOC-2</a></li>
-              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Enterprise SLA</a></li>
-              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Brand Assets</a></li>
+              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Open Source &amp; Code</a></li>
+              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Research Transparency</a></li>
+              <li><a href="#contact" className="hover:text-[#171717] transition-colors">Project Status</a></li>
               <li>
-                <a href="mailto:careers@locentra.ai" className="hover:text-[#171717] transition-colors">
-                  Careers (We're Hiring)
+                <a href="mailto:contact@locentra.ai" className="hover:text-[#171717] transition-colors">
+                  Contact Research Team
                 </a>
               </li>
             </ul>

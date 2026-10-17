@@ -58,6 +58,24 @@ describe('Locentra Enterprise Landing Page', () => {
     expect(screen.getByText(/Conceptual Demonstration HUD/i)).toBeInTheDocument();
   });
 
+  it('renders How It Works section with 4-step workflow and problem explanation', () => {
+    render(<LandingPageView />);
+
+    // Problem explanation
+    expect(screen.getByText(/Why GPS Fails and Indoor Wireless Signals Lie/i)).toBeInTheDocument();
+    expect(screen.getByText(/NLOS Delay Bias/i)).toBeInTheDocument();
+
+    // 4 Steps navigation buttons
+    expect(screen.getByRole('button', { name: /01 Configure a Virtual Room/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /02 Simulate Signal Problems/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /03 Run Positioning Algorithms/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /04 Evaluate the Results/i })).toBeInTheDocument();
+
+    // Switch step
+    fireEvent.click(screen.getByRole('button', { name: /02 Simulate Signal Problems/i }));
+    expect(screen.getByText(/Controlled RF Degradation/i)).toBeInTheDocument();
+  });
+
   it('renders Section 2 Architecture tabs and switches between modules', () => {
     render(<LandingPageView />);
 
