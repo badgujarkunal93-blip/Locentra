@@ -27,8 +27,8 @@ import {
 export const SOLVER_METAS: Record<string, SolverDisplayMeta> = {
   robust_nls: {
     id: 'robust_nls',
-    name: 'Robust NLS',
-    shortDesc: 'Nonlinear least squares (Huber)',
+    name: 'Robust NLS (Huber)',
+    shortDesc: 'Nonlinear least squares with adaptive Huber loss',
     category: 'Optimization',
     color: '#159B71',
     textColor: 'text-[#159B71]',
@@ -37,9 +37,9 @@ export const SOLVER_METAS: Record<string, SolverDisplayMeta> = {
   },
   robust_nls_kalman: {
     id: 'robust_nls_kalman',
-    name: 'NLS + Kalman',
-    shortDesc: 'NLS with extended Kalman filter',
-    category: 'Filtering',
+    name: 'Robust NLS + Kalman',
+    shortDesc: 'Huber M-estimation with kinematic motion filter',
+    category: 'Hybrid',
     color: '#8B6CF6',
     textColor: 'text-[#8B6CF6]',
     bgColor: '#F0ECFC',
@@ -48,7 +48,7 @@ export const SOLVER_METAS: Record<string, SolverDisplayMeta> = {
   nls: {
     id: 'nls',
     name: 'NLS (Ordinary)',
-    shortDesc: 'Standard nonlinear least squares',
+    shortDesc: 'Standard unweighted nonlinear least squares',
     category: 'Geometric',
     color: '#268BFF',
     textColor: 'text-[#268BFF]',
@@ -57,8 +57,8 @@ export const SOLVER_METAS: Record<string, SolverDisplayMeta> = {
   },
   nls_kalman: {
     id: 'nls_kalman',
-    name: 'Baseline Trilateration',
-    shortDesc: 'Geometric trilateration (LSQ)',
+    name: 'Baseline Trilateration (NLS + Kalman)',
+    shortDesc: 'Geometric trilateration with state propagation',
     category: 'Geometric',
     color: '#F5AC35',
     textColor: 'text-[#F5AC35]',
@@ -581,6 +581,36 @@ export const BenchmarkArenaView: React.FC = () => {
           <MonteCarloPanel solvers={activeSolversList} />
         </div>
       )}
+
+      {/* Research Transparency & Known Edge Cases Callout */}
+      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xs">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-[#F1F5F9]">
+          <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
+            !
+          </div>
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#0F172A]">
+            Research Note: Transparent Reporting of Known Edge Cases
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 text-xs text-[#475569] leading-relaxed">
+          <div>
+            <p className="font-semibold text-[#0F172A] mb-1">
+              Sparse &amp; Collinear Anchor Layouts:
+            </p>
+            <p>
+              In extreme geometries where anchor count drops to 3 or anchors are arranged in a near-straight line (high Geometric Dilution of Precision), the Huber loss function can mistakenly downweight legitimate geometric residuals. In such degenerate geometries, standard Ordinary NLS may achieve lower mean error than Huber-loss estimation. We report both cases transparently to guide realistic hardware placement.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-[#0F172A] mb-1">
+              Accuracy vs. Valid-Estimate Rate:
+            </p>
+            <p>
+              An algorithm could report artificially low RMSE if divergent or ill-conditioned fixes are discarded. Locentra explicitly displays the Valid-Estimate Rate alongside RMSE and P95 error so all solvers are evaluated on both precision and operational reliability across every timestep.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
