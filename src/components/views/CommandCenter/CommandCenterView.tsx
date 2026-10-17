@@ -536,8 +536,10 @@ export const CommandCenterView: React.FC = () => {
                 ? `${rmseTrend <= 0 ? '↓' : '↑'} ${Math.abs(rmseTrend)}% vs previous run`
                 : '↓ -24% vs previous run'}
             </span>
-            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#DCFCE7] text-[#15803D]">
-              LIVE DATA
+            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold ${
+              currentRun ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-slate-100 text-slate-600'
+            }`}>
+              {currentRun ? 'COMPUTED (SYNTHETIC)' : 'DEMO BASELINE'}
             </span>
           </div>
           <p className="text-[10px] text-[#64748B] mt-1 truncate">
@@ -590,8 +592,10 @@ export const CommandCenterView: React.FC = () => {
                 ? `${p95Trend <= 0 ? '↓' : '↑'} ${Math.abs(p95Trend)}% vs previous run`
                 : '↓ -18% vs previous run'}
             </span>
-            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#DCFCE7] text-[#15803D]">
-              LIVE DATA
+            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold ${
+              currentRun ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-slate-100 text-slate-600'
+            }`}>
+              {currentRun ? 'COMPUTED (SYNTHETIC)' : 'DEMO BASELINE'}
             </span>
           </div>
           <p className="text-[10px] text-[#64748B] mt-1 truncate">
@@ -606,8 +610,8 @@ export const CommandCenterView: React.FC = () => {
         >
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-xs font-bold text-[#0F172A]">Processing Time</span>
-              <p className="text-[11px] text-[#64748B] mt-0.5">Request round-trip latency</p>
+              <span className="text-xs font-bold text-[#0F172A]">API Response Time</span>
+              <p className="text-[11px] text-[#64748B] mt-0.5">Request round-trip latency (solver + network)</p>
             </div>
             <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
               <Zap className="w-4 h-4" />
@@ -660,8 +664,10 @@ export const CommandCenterView: React.FC = () => {
                 ? `${latencyTrend <= 0 ? '↓' : '↑'} ${Math.abs(latencyTrend)}% vs previous run`
                 : '↓ -31% vs previous run'}
             </span>
-            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#DCFCE7] text-[#15803D]">
-              LIVE DATA
+            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold ${
+              currentRun ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-slate-100 text-slate-600'
+            }`}>
+              {currentRun ? 'COMPUTED (SYNTHETIC)' : 'DEMO BASELINE'}
             </span>
           </div>
           <p className="text-[10px] text-[#64748B] mt-1 truncate">
@@ -707,8 +713,10 @@ export const CommandCenterView: React.FC = () => {
                 ? `↓ ${validRateDelta}% vs previous run`
                 : 'Steady (100% convergence)'}
             </span>
-            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#DCFCE7] text-[#15803D]">
-              LIVE DATA
+            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold ${
+              currentRun ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-slate-100 text-slate-600'
+            }`}>
+              {currentRun ? 'COMPUTED (SYNTHETIC)' : 'DEMO BASELINE'}
             </span>
           </div>
           <p className="text-[10px] text-[#64748B] mt-1 truncate">
@@ -870,7 +878,7 @@ export const CommandCenterView: React.FC = () => {
                   </td>
                 </tr>
 
-                {/* 2. Extended Kalman */}
+                {/* 2. Ordinary NLS + Kalman */}
                 <tr
                   className={`hover:bg-[#F8FAFC] transition-colors ${
                     selectedSolver === 'nls_kalman' ? 'bg-[#F0FDF4]' : ''
@@ -878,13 +886,13 @@ export const CommandCenterView: React.FC = () => {
                 >
                   <td className="py-2.5 text-[#64748B]">2</td>
                   <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>Extended Kalman</span>
+                    <span>Ordinary NLS + Kalman</span>
                     {selectedSolver === 'nls_kalman' && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" title="Current Active Solver" />
                     )}
                   </td>
                   <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#ECFDF5] text-[#059669] font-sans font-semibold">
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold">
                       Filtering
                     </span>
                   </td>
@@ -905,7 +913,7 @@ export const CommandCenterView: React.FC = () => {
                   </td>
                 </tr>
 
-                {/* 3. NLS Ordinary */}
+                {/* 3. Ordinary NLS */}
                 <tr
                   className={`hover:bg-[#F8FAFC] transition-colors ${
                     selectedSolver === 'nls' ? 'bg-[#F0FDF4]' : ''
@@ -913,7 +921,7 @@ export const CommandCenterView: React.FC = () => {
                 >
                   <td className="py-2.5 text-[#64748B]">3</td>
                   <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>NLS (Ordinary)</span>
+                    <span>Ordinary NLS</span>
                     {selectedSolver === 'nls' && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" title="Current Active Solver" />
                     )}
@@ -940,23 +948,36 @@ export const CommandCenterView: React.FC = () => {
                   </td>
                 </tr>
 
-                {/* 4. Levenberg-Marquardt */}
-                <tr className="hover:bg-[#F8FAFC] transition-colors">
+                {/* 4. Robust NLS + Kalman */}
+                <tr
+                  className={`hover:bg-[#F8FAFC] transition-colors ${
+                    selectedSolver === 'robust_nls_kalman' ? 'bg-[#F0FDF4]' : ''
+                  }`}
+                >
                   <td className="py-2.5 text-[#64748B]">4</td>
-                  <td className="py-2.5 font-bold text-[#0F172A]">Levenberg-Marquardt</td>
+                  <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
+                    <span>Robust NLS + Kalman</span>
+                    {selectedSolver === 'robust_nls_kalman' && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" title="Current Active Solver" />
+                    )}
+                  </td>
                   <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold">
-                      Optimization
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#ECFDF5] text-[#059669] font-sans font-semibold">
+                      Hybrid
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-[#0F172A]">0.46</td>
-                  <td className="py-2.5 text-right text-[#0F172A]">1.05</td>
-                  <td className="py-2.5 text-right text-[#64748B]">2.12</td>
+                  <td className="py-2.5 text-right font-bold text-[#0F172A]">
+                    {compareResponse?.solvers?.robust_nls_kalman?.metrics?.rmse_m ? `${compareResponse.solvers.robust_nls_kalman.metrics.rmse_m.toFixed(2)}m` : '0.19m'}
+                  </td>
+                  <td className="py-2.5 text-right text-[#0F172A]">
+                    {compareResponse?.solvers?.robust_nls_kalman?.metrics?.p95_error_m ? `${compareResponse.solvers.robust_nls_kalman.metrics.p95_error_m.toFixed(2)}m` : '0.44m'}
+                  </td>
+                  <td className="py-2.5 text-right text-[#64748B]">1.65</td>
                   <td className="py-2.5 text-right font-semibold text-[#0F172A]">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span>96.8%</span>
+                      <span>99.9%</span>
                       <div className="w-10 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                        <div className="w-[96.8%] h-full bg-[#14B8A6] rounded-full" />
+                        <div className="w-[99.9%] h-full bg-[#14B8A6] rounded-full" />
                       </div>
                     </div>
                   </td>
