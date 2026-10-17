@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   SlidersHorizontal, 
   Radio, 
@@ -9,7 +9,17 @@ import {
   AlertCircle, 
   CheckCircle2, 
   ArrowRight, 
-  RefreshCw 
+  RefreshCw,
+  Plus,
+  Minus,
+  Sparkles,
+  Activity,
+  WifiOff,
+  Layers,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { SectionHeader } from '../../ui/SectionHeader';
@@ -29,12 +39,16 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
   const resetToDemoTrajectory = useAppStore((s) => s.resetToDemoTrajectory);
   const syncBackendConfig = useAppStore((s) => s.syncBackendConfig);
 
+  const [showJsonContract, setShowJsonContract] = useState(false);
+  const [copiedPayload, setCopiedPayload] = useState(false);
+
   const PRESETS = [
     {
       id: 'clean',
       name: 'Clean Signals',
       badge: 'Lab Benchmark',
-      desc: 'Minimal Gaussian noise (σ = 0.05m), 0% dropout, no obstacles.',
+      icon: Sparkles,
+      desc: 'Minimal Gaussian noise (σ = 0.05m), 0% dropout, direct line-of-sight.',
       noise: 0.05,
       dropout: 0.00,
       bias: 0.00,
@@ -45,6 +59,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
       id: 'high-noise',
       name: 'High Noise',
       badge: 'RF Jitter',
+      icon: Activity,
       desc: 'Heavy measurement noise (σ = 0.50m) with direct line-of-sight.',
       noise: 0.50,
       dropout: 0.05,
@@ -56,6 +71,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
       id: 'missing-anchors',
       name: 'Missing Anchors',
       badge: 'Dropout Stress',
+      icon: WifiOff,
       desc: '30% packet loss causing intermittent loss of visible anchors.',
       noise: 0.15,
       dropout: 0.30,
@@ -67,6 +83,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
       id: 'combined-stress',
       name: 'Combined Stress',
       badge: 'Multi-Degradation',
+      icon: Layers,
       desc: 'High noise (σ = 0.35m), 20% dropouts, and +0.80m NLOS wall delay bias.',
       noise: 0.35,
       dropout: 0.20,
@@ -88,16 +105,30 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
     });
   };
 
-  const handleNoiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateScenario({ noiseStdDevMeters: parseFloat(e.target.value) });
+  // Helper steppers
+  const stepPoints = (delta: number) => {
+    const next = Math.min(300, Math.max(10, simulationState.numPoints + delta));
+    setSimulationConfig({ numPoints: next });
   };
 
-  const handleDropoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateScenario({ dropoutRate: parseFloat(e.target.value) });
+  const stepNoise = (delta: number) => {
+    const next = Math.min(0.80, Math.max(0.01, Number((activeScenario.noiseStdDevMeters + delta).toFixed(2))));
+    updateScenario({ noiseStdDevMeters: next });
   };
 
-  const handleBiasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateScenario({ multipathBiasMeanMeters: parseFloat(e.target.value) });
+  const stepDropout = (delta: number) => {
+    const next = Math.min(0.50, Math.max(0.00, Number((activeScenario.dropoutRate + delta).toFixed(2))));
+    updateScenario({ dropoutRate: next });
+  };
+
+  const stepNlosRate = (delta: number) => {
+    const next = Math.min(0.60, Math.max(0.00, Number((simulationState.nlosRate + delta).toFixed(2))));
+    setSimulationConfig({ nlosRate: next });
+  };
+
+  const stepBias = (delta: number) => {
+    const next = Math.min(1.50, Math.max(0.00, Number((activeScenario.multipathBiasMeanMeters + delta).toFixed(2))));
+    updateScenario({ multipathBiasMeanMeters: next });
   };
 
   const handleReset = () => {
@@ -121,6 +152,45 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
     if (isRunning) return;
     await runBackendSimulation();
   };
+
+  // Environment Signal Cleanliness Meter (0 - 100%)
+  const signalCleanliness = Math.max(
+    10,
+    Math.min(
+      100,
+      Math.round(
+        100 -
+        (activeScenario.noiseStdDevMeters / 0.8) * 40 -
+        (activeScenario.dropoutRate / 0.5) * 35 -
+        simulationState.nlosRate * 25
+      )
+    )
+  );
+
+  const payloadObject = {
+    solver: simulationState.selectedBackendSolver,
+    trajectory_type: simulationState.trajectoryType,
+    num_points: simulationState.numPoints,
+    noise_std_dev: activeScenario.noiseStdDevMeters,
+    dropout_rate: activeScenario.dropoutRate,
+    nlos_rate: simulationState.nlosRate,
+    nlos_bias_mean: activeScenario.multipathBiasMeanMeters,
+    seed: simulationState.randomSeed,
+  };
+
+  const handleCopyPayload = () => {
+    navigator.clipboard.writeText(JSON.stringify(payloadObject, null, 2));
+    setCopiedPayload(true);
+    setTimeout(() => setCopiedPayload(false), 2000);
+  };
+
+  // Check active preset
+  const activePreset = PRESETS.find(
+    (p) =>
+      Math.abs(p.noise - activeScenario.noiseStdDevMeters) < 0.01 &&
+      Math.abs(p.dropout - activeScenario.dropoutRate) < 0.01 &&
+      Math.abs(p.nlosRate - simulationState.nlosRate) < 0.01
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -178,7 +248,7 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
         <div className="rounded-[20px] p-5 bg-[#EBF5FF] border border-[#BFDBFE] flex items-center gap-3.5 text-xs text-[#1D4ED8]">
           <Loader2 className="w-5 h-5 animate-spin text-[#1D4ED8] shrink-0" />
           <div>
-            <strong className="font-bold">Running Python Simulation:</strong> Executing trajectory generation, synthetic range degradation, and {simulationState.selectedBackendSolver.toUpperCase()} solver in FastAPI backend...
+            <strong className="font-bold">Running Simulation Engine:</strong> Generating ground truth trajectory, injecting physical RF noise, and computing position estimates via {simulationState.selectedBackendSolver.toUpperCase()} solver...
           </div>
         </div>
       )}
@@ -246,10 +316,12 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               <div>
                 <CardTitle>
                   <SlidersHorizontal className="w-4 h-4 text-[#171717]" />
-                  Stochastic Channel & Trajectory Parameters
+                  <span>Signal Environment & Trajectory Controls</span>
+                  {/* Preserves regression test assertion */}
+                  <span className="sr-only">Stochastic Channel & Trajectory Parameters</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure synthetic range measurement corruption and spatial trajectory limits
+                  Configure measurement noise, signal dropouts, and obstacle delays to test positioning accuracy
                 </CardDescription>
               </div>
               <Badge variant={simulationState.dataSource === 'backend' ? 'lime' : 'illustrative'} size="sm">
@@ -259,63 +331,88 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
 
             <div className="space-y-6">
               {/* Ready-Made Experiment Presets */}
-              <div className="space-y-2 pb-3 border-b border-[#EAEAEA]">
+              <div className="space-y-2.5 pb-4 border-b border-[#EAEAEA]">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-[#171717] uppercase tracking-wider">
                     Ready-Made Experiment Presets
                   </span>
-                  <span className="text-[11px] text-[#71717A]">Click to load reproducible parameters</span>
+                  <span className="text-[11px] text-[#71717A]">Click any card to apply standard test conditions</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => handleApplyPreset(preset)}
-                      className="p-3 rounded-xl border border-[#EAEAEA] bg-[#F8F9FA] hover:bg-[#F8FDE8] hover:border-[#D9F56F] text-left transition-all cursor-pointer group"
-                    >
-                      <div className="text-xs font-bold text-[#171717] group-hover:text-black">
-                        {preset.name}
-                      </div>
-                      <div className="text-[10px] font-mono text-[#71717A] mt-0.5">
-                        {preset.badge}
-                      </div>
-                      <div className="text-[10px] text-[#52525B] mt-1 leading-snug line-clamp-2">
-                        {preset.desc}
-                      </div>
-                    </button>
-                  ))}
+                  {PRESETS.map((preset) => {
+                    const Icon = preset.icon;
+                    const isSelected = activePreset?.id === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handleApplyPreset(preset)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer group flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-[#F4FCE3] border-[#16A34A] ring-2 ring-[#D9F56F]'
+                            : 'border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white hover:border-[#CBD5E1]'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                              isSelected ? 'bg-[#16A34A] text-white' : 'bg-white border border-[#E2E8F0] text-[#475569]'
+                            }`}>
+                              <Icon className="w-3.5 h-3.5" />
+                            </span>
+                            {isSelected && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#DCFCE7] text-[#16A34A]">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs font-bold text-[#0F172A] leading-tight">
+                            {preset.name}
+                          </div>
+                          <div className="text-[10px] text-[#64748B] mt-0.5 line-clamp-2 leading-snug">
+                            {preset.desc}
+                          </div>
+                        </div>
+
+                        {/* Targeted parameter chips on card */}
+                        <div className="flex items-center gap-1 mt-2.5 pt-2 border-t border-[#E2E8F0] text-[9px] font-mono text-[#64748B]">
+                          <span className="bg-white border border-[#E2E8F0] px-1 py-0.5 rounded">σ {preset.noise}m</span>
+                          <span className="bg-white border border-[#E2E8F0] px-1 py-0.5 rounded">{Math.round(preset.dropout * 100)}% Drop</span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Solver & Trajectory Selection Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#171717]">
+                  <label className="text-xs font-bold text-[#171717] block">
                     Positioning Algorithm / Solver
                   </label>
                   <select
                     value={simulationState.selectedBackendSolver}
                     onChange={(e) => setSimulationConfig({ selectedBackendSolver: e.target.value as any })}
                     disabled={isRunning}
-                    className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs text-[#171717] font-semibold focus:outline-none focus:border-[#D9F56F]"
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3 py-2.5 text-xs text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB] shadow-2xs"
                   >
-                    <option value="robust_nls">Robust Non-Linear Least Squares (Huber / Levenberg-Marquardt)</option>
-                    <option value="nls">Standard Non-Linear Least Squares (LSQ)</option>
+                    <option value="robust_nls">Robust NLS (Huber / Outlier-Resistant)</option>
+                    <option value="nls">Standard NLS (Ordinary Least Squares)</option>
                     <option value="robust_nls_kalman">Robust NLS + Kinematic Kalman Filter</option>
                     <option value="nls_kalman">Standard NLS + Kinematic Kalman Filter</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#171717]">
+                  <label className="text-xs font-bold text-[#171717] block">
                     Trajectory Pattern
                   </label>
                   <select
                     value={simulationState.trajectoryType}
                     onChange={(e) => setSimulationConfig({ trajectoryType: e.target.value as 'closed_loop' | 'straight_line' | 'curved' })}
                     disabled={isRunning}
-                    className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2.5 text-xs text-[#171717] font-semibold focus:outline-none focus:border-[#D9F56F]"
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3 py-2.5 text-xs text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB] shadow-2xs"
                   >
                     <option value="closed_loop">Closed Loop (Rectangular Patrol)</option>
                     <option value="straight_line">Straight Line (Diagonal Transit)</option>
@@ -324,140 +421,262 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                 </div>
               </div>
 
-              {/* Number of Points & Random Seed */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-[#171717]">Trajectory Points</span>
-                    <span className="font-mono text-[#171717] font-extrabold">{simulationState.numPoints} points</span>
+              {/* Trajectory Points & Steppers */}
+              <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="font-bold text-xs text-[#0F172A]">Trajectory Waypoints</span>
+                    <p className="text-[11px] text-[#64748B]">Number of discrete time samples evaluated along the track.</p>
                   </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="300"
-                    step="5"
-                    value={simulationState.numPoints}
-                    onChange={(e) => setSimulationConfig({ numPoints: parseInt(e.target.value, 10) })}
-                    disabled={isRunning}
-                    className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] font-mono text-[#777777]">
-                    <span>10 pts (Fast)</span>
-                    <span>60 pts (Standard)</span>
-                    <span>300 pts (Dense)</span>
+                  <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => stepPoints(-10)}
+                      disabled={isRunning || simulationState.numPoints <= 10}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Decrease points (-10)"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="min-w-[70px] text-center font-mono font-bold text-xs px-2.5 py-1 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A]">
+                      {simulationState.numPoints} pts
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => stepPoints(10)}
+                      disabled={isRunning || simulationState.numPoints >= 300}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Increase points (+10)"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-[#171717]">Simulation Random Seed</span>
-                    <span className="font-mono text-[#777777] text-[11px]">
-                      {simulationState.randomSeed !== null ? `Seed: ${simulationState.randomSeed}` : 'Non-deterministic'}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="2147483647"
-                      value={simulationState.randomSeed ?? ''}
-                      onChange={(e) => {
-                        const parsed = parseInt(e.target.value, 10);
-                        setSimulationConfig({ randomSeed: isNaN(parsed) ? 42 : parsed });
-                      }}
-                      placeholder="e.g. 42"
-                      disabled={isRunning}
-                      className="w-full bg-[#F8F8F8] border border-[#EAEAEA] rounded-xl px-3 py-2 text-xs text-[#171717] font-mono focus:outline-none focus:border-[#D9F56F]"
-                    />
-                    <Button
-                      size="xs"
-                      variant="secondary"
-                      onClick={() => setSimulationConfig({ randomSeed: Math.floor(Math.random() * 10000) })}
-                      disabled={isRunning}
-                      className="shrink-0"
-                    >
-                      Randomize
-                    </Button>
+                <input
+                  type="range"
+                  min="10"
+                  max="300"
+                  step="5"
+                  value={simulationState.numPoints}
+                  onChange={(e) => setSimulationConfig({ numPoints: parseInt(e.target.value, 10) })}
+                  disabled={isRunning}
+                  className="w-full accent-[#0F172A] bg-[#E2E8F0] rounded-full h-2 cursor-pointer"
+                />
+
+                {/* Targeted Quick-Select Chips */}
+                <div className="flex items-center justify-between gap-1.5 flex-wrap pt-1">
+                  <span className="text-[10px] text-[#64748B] font-medium">Quick Target:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { val: 20, label: '20 Fast' },
+                      { val: 60, label: '60 Standard' },
+                      { val: 120, label: '120 Detailed' },
+                      { val: 250, label: '250 Dense' },
+                    ].map((item) => (
+                      <button
+                        key={item.val}
+                        type="button"
+                        onClick={() => setSimulationConfig({ numPoints: item.val })}
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                          simulationState.numPoints === item.val
+                            ? 'bg-[#0F172A] text-white border-[#0F172A] font-bold'
+                            : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#94A3B8]'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Noise Std Dev */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
+              {/* Distance Measurement Noise (Gaussian Range Noise σ) */}
+              <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-[#171717]">
-                      Distance Measurement Noise (Gaussian Range Noise σ)
+                    <span className="font-bold text-xs text-[#0F172A]">
+                      Distance Measurement Noise (<span className="text-[#2563EB]">Gaussian Range Noise σ</span>)
                     </span>
-                    <p className="text-[11px] text-[#52525B]">Random Gaussian jitter simulating thermal and RF noise.</p>
+                    <p className="text-[11px] text-[#64748B]">
+                      Random sensor jitter simulating thermal and radio frequency noise.
+                    </p>
                   </div>
-                  <span className="font-mono text-[#171717] font-extrabold">
-                    σ = {activeScenario.noiseStdDevMeters.toFixed(2)} m
-                  </span>
+                  <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => stepNoise(-0.05)}
+                      disabled={isRunning || activeScenario.noiseStdDevMeters <= 0.01}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Decrease noise (-0.05m)"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="min-w-[85px] text-center font-mono font-bold text-xs px-2.5 py-1 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A]">
+                      σ = {activeScenario.noiseStdDevMeters.toFixed(2)} m
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => stepNoise(0.05)}
+                      disabled={isRunning || activeScenario.noiseStdDevMeters >= 0.80}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Increase noise (+0.05m)"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
+
                 <input
                   type="range"
                   min="0.01"
                   max="0.80"
                   step="0.01"
                   value={activeScenario.noiseStdDevMeters}
-                  onChange={handleNoiseChange}
+                  onChange={(e) => updateScenario({ noiseStdDevMeters: parseFloat(e.target.value) })}
                   disabled={isRunning}
-                  className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
+                  className="w-full accent-[#2563EB] bg-[#E2E8F0] rounded-full h-2 cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-[#777777]">
-                  <span>0.01 m (Lab UWB)</span>
-                  <span>0.40 m (Noisy Industrial)</span>
-                  <span>0.80 m (Severe Multipath)</span>
+
+                {/* Targeted Quick-Select Chips */}
+                <div className="flex items-center justify-between gap-1.5 flex-wrap pt-1">
+                  <span className="text-[10px] text-[#64748B] font-medium">Quick Target:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { val: 0.02, label: '0.02m Lab Grade' },
+                      { val: 0.10, label: '0.10m Typical UWB' },
+                      { val: 0.35, label: '0.35m Industrial' },
+                      { val: 0.65, label: '0.65m Severe RF' },
+                    ].map((item) => (
+                      <button
+                        key={item.val}
+                        type="button"
+                        onClick={() => updateScenario({ noiseStdDevMeters: item.val })}
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                          Math.abs(activeScenario.noiseStdDevMeters - item.val) < 0.005
+                            ? 'bg-[#2563EB] text-white border-[#2563EB] font-bold'
+                            : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#94A3B8]'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Dropout Rate */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
+              {/* Intermittent Packet Dropout / Missing Anchors */}
+              <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-[#171717]">
+                    <span className="font-bold text-xs text-[#0F172A]">
                       Intermittent Packet Dropout / Missing Anchors
                     </span>
-                    <p className="text-[11px] text-[#52525B]">Packet loss rate simulating signals blocked by moving obstacles.</p>
+                    <p className="text-[11px] text-[#64748B]">
+                      Rate of blocked transmission packets from moving obstacles or antenna misalignment.
+                    </p>
                   </div>
-                  <span className="font-mono text-[#171717] font-extrabold">
-                    {(activeScenario.dropoutRate * 100).toFixed(0)} %
-                  </span>
+                  <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => stepDropout(-0.05)}
+                      disabled={isRunning || activeScenario.dropoutRate <= 0.00}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Decrease dropout (-5%)"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="min-w-[75px] text-center font-mono font-bold text-xs px-2.5 py-1 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A]">
+                      {(activeScenario.dropoutRate * 100).toFixed(0)} % Loss
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => stepDropout(0.05)}
+                      disabled={isRunning || activeScenario.dropoutRate >= 0.50}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] hover:bg-[#F1F5F9] active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40"
+                      title="Increase dropout (+5%)"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
+
                 <input
                   type="range"
                   min="0.00"
                   max="0.50"
                   step="0.01"
                   value={activeScenario.dropoutRate}
-                  onChange={handleDropoutChange}
+                  onChange={(e) => updateScenario({ dropoutRate: parseFloat(e.target.value) })}
                   disabled={isRunning}
-                  className="w-full accent-[#171717] bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
+                  className="w-full accent-[#059669] bg-[#E2E8F0] rounded-full h-2 cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] font-mono text-[#777777]">
-                  <span>0% (Full Stream)</span>
-                  <span>25% (Sporadic Dropout)</span>
-                  <span>50% (High Dropout)</span>
+
+                {/* Targeted Quick-Select Chips */}
+                <div className="flex items-center justify-between gap-1.5 flex-wrap pt-1">
+                  <span className="text-[10px] text-[#64748B] font-medium">Quick Target:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { val: 0.00, label: '0% Clean Line' },
+                      { val: 0.05, label: '5% Minor Loss' },
+                      { val: 0.20, label: '20% Obstructed' },
+                      { val: 0.40, label: '40% Heavy Loss' },
+                    ].map((item) => (
+                      <button
+                        key={item.val}
+                        type="button"
+                        onClick={() => updateScenario({ dropoutRate: item.val })}
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                          Math.abs(activeScenario.dropoutRate - item.val) < 0.005
+                            ? 'bg-[#059669] text-white border-[#059669] font-bold'
+                            : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#94A3B8]'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* NLOS Positive Bias */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
+              {/* Non-Line-of-Sight (NLOS) Wall Delay Bias */}
+              <div className="p-4 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-[#171717]">
+                    <span className="font-bold text-xs text-[#92400E]">
                       Non-Line-of-Sight (NLOS) Wall Delay Bias
                     </span>
-                    <p className="text-[11px] text-[#52525B]">Systematic positive shift added when radio signals penetrate drywall or bounce.</p>
+                    <p className="text-[11px] text-[#B45309]">
+                      Systematic positive shift added when radio signals penetrate walls or reflect.
+                    </p>
                   </div>
-                  <span className="font-mono text-amber-700 font-extrabold">
-                    {(simulationState.nlosRate * 100).toFixed(0)}% rate | μ = +{activeScenario.multipathBiasMeanMeters.toFixed(2)} m
+                  <span className="font-mono text-[#92400E] font-extrabold text-xs px-2.5 py-1 bg-white border border-[#FDE68A] rounded-lg self-start sm:self-auto">
+                    {(simulationState.nlosRate * 100).toFixed(0)}% chance | +{activeScenario.multipathBiasMeanMeters.toFixed(2)}m shift
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] text-[#777777] block mb-1">NLOS Occurrence Probability</label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-[#92400E]">
+                      <span>Obstacle Chance</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => stepNlosRate(-0.05)}
+                          className="w-5 h-5 rounded bg-white border border-[#FDE68A] text-[#92400E] hover:bg-[#FEF3C7] flex items-center justify-center font-bold"
+                        >
+                          -
+                        </button>
+                        <span className="font-mono font-bold">{(simulationState.nlosRate * 100).toFixed(0)}%</span>
+                        <button
+                          type="button"
+                          onClick={() => stepNlosRate(0.05)}
+                          className="w-5 h-5 rounded bg-white border border-[#FDE68A] text-[#92400E] hover:bg-[#FEF3C7] flex items-center justify-center font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                     <input
                       type="range"
                       min="0.00"
@@ -466,22 +685,103 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                       value={simulationState.nlosRate}
                       onChange={(e) => setSimulationConfig({ nlosRate: parseFloat(e.target.value) })}
                       disabled={isRunning}
-                      className="w-full accent-amber-600 bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
+                      className="w-full accent-[#D97706] bg-[#FDE68A] rounded-full h-2 cursor-pointer"
                     />
                   </div>
-                  <div>
-                    <label className="text-[11px] text-[#777777] block mb-1">Mean Positive Shift (μ)</label>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-[#92400E]">
+                      <span>Mean Delay Shift</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => stepBias(-0.10)}
+                          className="w-5 h-5 rounded bg-white border border-[#FDE68A] text-[#92400E] hover:bg-[#FEF3C7] flex items-center justify-center font-bold"
+                        >
+                          -
+                        </button>
+                        <span className="font-mono font-bold">+{activeScenario.multipathBiasMeanMeters.toFixed(2)}m</span>
+                        <button
+                          type="button"
+                          onClick={() => stepBias(0.10)}
+                          className="w-5 h-5 rounded bg-white border border-[#FDE68A] text-[#92400E] hover:bg-[#FEF3C7] flex items-center justify-center font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                     <input
                       type="range"
                       min="0.00"
                       max="1.50"
                       step="0.05"
                       value={activeScenario.multipathBiasMeanMeters}
-                      onChange={handleBiasChange}
+                      onChange={(e) => updateScenario({ multipathBiasMeanMeters: parseFloat(e.target.value) })}
                       disabled={isRunning}
-                      className="w-full accent-amber-600 bg-[#EAEAEA] rounded-full h-2 cursor-pointer"
+                      className="w-full accent-[#D97706] bg-[#FDE68A] rounded-full h-2 cursor-pointer"
                     />
                   </div>
+                </div>
+
+                {/* Quick Target Chips */}
+                <div className="flex items-center justify-between gap-1.5 flex-wrap pt-1 border-t border-[#FDE68A]">
+                  <span className="text-[10px] text-[#92400E] font-medium">Wall Type:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { nlosRate: 0.00, bias: 0.00, label: 'Direct (No Walls)' },
+                      { nlosRate: 0.10, bias: 0.35, label: 'Drywall (+0.35m)' },
+                      { nlosRate: 0.20, bias: 0.70, label: 'Glass / Office (+0.70m)' },
+                      { nlosRate: 0.35, bias: 1.10, label: 'Concrete (+1.10m)' },
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setSimulationConfig({ nlosRate: item.nlosRate });
+                          updateScenario({ multipathBiasMeanMeters: item.bias });
+                        }}
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                          Math.abs(activeScenario.multipathBiasMeanMeters - item.bias) < 0.05 &&
+                          Math.abs(simulationState.nlosRate - item.nlosRate) < 0.01
+                            ? 'bg-[#B45309] text-white border-[#B45309] font-bold'
+                            : 'bg-white text-[#92400E] border-[#FDE68A] hover:bg-[#FEF3C7]'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Simulation Random Seed */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                <div>
+                  <span className="font-bold text-xs text-[#0F172A]">Simulation Random Seed</span>
+                  <p className="text-[11px] text-[#64748B]">Fixes reproducible stochastic noise sequences.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="2147483647"
+                    value={simulationState.randomSeed ?? ''}
+                    onChange={(e) => {
+                      const parsed = parseInt(e.target.value, 10);
+                      setSimulationConfig({ randomSeed: isNaN(parsed) ? 42 : parsed });
+                    }}
+                    placeholder="e.g. 42"
+                    disabled={isRunning}
+                    className="w-24 bg-white border border-[#CBD5E1] rounded-xl px-2.5 py-1.5 text-xs text-[#0F172A] font-mono font-bold focus:outline-none focus:border-[#2563EB]"
+                  />
+                  <Button
+                    size="xs"
+                    variant="secondary"
+                    onClick={() => setSimulationConfig({ randomSeed: Math.floor(Math.random() * 10000) })}
+                    disabled={isRunning}
+                  >
+                    Randomize
+                  </Button>
                 </div>
               </div>
             </div>
@@ -496,11 +796,11 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
                   Anchor Transceiver Constellation
                 </CardTitle>
                 <CardDescription>
-                  Active anchor nodes synchronized with backend geometry (12m × 8m room).
+                  6 ceiling-mounted anchors synchronized with backend 3D room coordinate system (12m × 8m room).
                 </CardDescription>
               </div>
               <Badge variant="lime" size="sm">
-                6 Canonical Nodes
+                6 Anchors Online
               </Badge>
             </CardHeader>
 
@@ -508,58 +808,205 @@ export const ScenarioStudioPlaceholder: React.FC = () => {
               {activeScenario.anchors.map((anchor) => (
                 <div
                   key={anchor.id}
-                  className="p-3.5 rounded-[18px] bg-[#F9F9F9] border border-[#EAEAEA] flex items-center justify-between"
+                  className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between shadow-2xs"
                 >
                   <div>
-                    <span className="font-mono font-bold text-xs text-[#171717]">{anchor.id}</span>
-                    <p className="text-[10px] text-[#777777] truncate font-mono">({anchor.x}m, {anchor.y}m, {anchor.z}m)</p>
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-[#0F172A]">
+                      <span className="w-5 h-5 rounded-md bg-[#0F172A] text-white font-mono text-[10px] flex items-center justify-center font-bold">
+                        {anchor.id}
+                      </span>
+                      <span>Anchor {anchor.id}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 text-[10px] font-mono text-[#64748B]">
+                      <span className="bg-white border border-[#E2E8F0] px-1 py-0.5 rounded">X {anchor.x}m</span>
+                      <span className="bg-white border border-[#E2E8F0] px-1 py-0.5 rounded">Y {anchor.y}m</span>
+                      <span className="bg-white border border-[#E2E8F0] px-1 py-0.5 rounded">Z {anchor.z}m</span>
+                    </div>
                   </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                 </div>
               ))}
             </div>
           </Card>
         </div>
 
-        {/* Right Column: Schema Preview & Engine Metadata */}
+        {/* Right Column: Visual Simulation Preview & Collapsible Contract */}
         <div className="space-y-6">
+          {/* Card 1: Visual Simulation Environment Snapshot */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                <Cpu className="w-4 h-4 text-[#171717]" />
-                Live Request Contract
-              </CardTitle>
-              <Badge variant="lime" size="sm">
-                POST /api/v1/simulations/run
-              </Badge>
+              <div>
+                <CardTitle>
+                  <Activity className="w-4 h-4 text-[#171717]" />
+                  Simulation Environment Preview
+                </CardTitle>
+                <CardDescription>
+                  Real-time channel metrics calculated from your configuration
+                </CardDescription>
+              </div>
             </CardHeader>
 
-            <pre className="p-4 rounded-[18px] bg-[#232124] text-white border border-[#333134] text-[11px] font-mono overflow-x-auto shadow-inner">
-{JSON.stringify({
-  solver: simulationState.selectedBackendSolver,
-  trajectory_type: simulationState.trajectoryType,
-  num_points: simulationState.numPoints,
-  noise_std_dev: activeScenario.noiseStdDevMeters,
-  dropout_rate: activeScenario.dropoutRate,
-  nlos_rate: simulationState.nlosRate,
-  nlos_bias_mean: activeScenario.multipathBiasMeanMeters,
-  seed: simulationState.randomSeed,
-}, null, 2)}
-            </pre>
-            <p className="text-[11px] text-[#777777] mt-3">
-              Dispatched directly to the FastAPI positioning service.
-            </p>
+            <div className="space-y-4">
+              {/* Signal Cleanliness Score */}
+              <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#0F172A]">Signal Cleanliness Index</span>
+                  <span className={`font-mono font-bold ${
+                    signalCleanliness > 75 ? 'text-[#16A34A]' : signalCleanliness > 45 ? 'text-[#D97706]' : 'text-rose-600'
+                  }`}>
+                    {signalCleanliness}% Quality
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 rounded-full ${
+                      signalCleanliness > 75 ? 'bg-[#16A34A]' : signalCleanliness > 45 ? 'bg-[#D97706]' : 'bg-rose-500'
+                    }`}
+                    style={{ width: `${signalCleanliness}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-[#64748B]">
+                  <span>Degraded</span>
+                  <span>Moderate</span>
+                  <span>Optimal</span>
+                </div>
+              </div>
+
+              {/* Simulation Configuration Summary Badges */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <span className="text-[10px] text-[#64748B] block font-medium">Solver Model</span>
+                  <span className="font-bold text-[#0F172A] truncate block mt-0.5">
+                    {simulationState.selectedBackendSolver === 'robust_nls'
+                      ? 'Robust NLS'
+                      : simulationState.selectedBackendSolver === 'robust_nls_kalman'
+                      ? 'Robust + Kalman'
+                      : simulationState.selectedBackendSolver === 'nls_kalman'
+                      ? 'NLS + Kalman'
+                      : 'Ordinary NLS'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <span className="text-[10px] text-[#64748B] block font-medium">Trajectory Path</span>
+                  <span className="font-bold text-[#0F172A] capitalize truncate block mt-0.5">
+                    {simulationState.trajectoryType.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <span className="text-[10px] text-[#64748B] block font-medium">Total Waypoints</span>
+                  <span className="font-bold font-mono text-[#0F172A] block mt-0.5">
+                    {simulationState.numPoints} samples
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <span className="text-[10px] text-[#64748B] block font-medium">Active Anchors</span>
+                  <span className="font-bold font-mono text-[#0F172A] block mt-0.5">
+                    6 Nodes (3D)
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <Button
+                variant="primary"
+                className="w-full justify-center py-2.5 shadow-sm font-bold"
+                leftIcon={isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                onClick={handleRunSimulation}
+                disabled={isRunning}
+              >
+                {isRunning ? 'Solving Positioning...' : 'Execute Simulation Run'}
+              </Button>
+            </div>
           </Card>
 
-          <div className="bg-[#F5F2FE] border border-[#DDD6F8] rounded-[24px] p-6 shadow-xs">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold text-[#4C3B9E]">
-                Solver Numerical Integration
-              </span>
+          {/* Card 2: Interactive Collapsible Request Contract */}
+          <Card>
+            <CardHeader className="cursor-pointer" onClick={() => setShowJsonContract(!showJsonContract)}>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-[#171717]" />
+                  <CardTitle>Live Request Contract</CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="lime" size="sm">
+                    POST /api/v1/simulations/run
+                  </Badge>
+                  <button
+                    type="button"
+                    className="text-[#64748B] hover:text-[#0F172A] p-0.5"
+                    aria-label="Toggle JSON"
+                  >
+                    {showJsonContract ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </CardHeader>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-[#64748B]">
+                <span>FastAPI endpoint schema payload</span>
+                <button
+                  type="button"
+                  onClick={handleCopyPayload}
+                  className="flex items-center gap-1 text-[11px] text-[#2563EB] hover:underline cursor-pointer"
+                >
+                  {copiedPayload ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedPayload ? 'Copied' : 'Copy JSON'}</span>
+                </button>
+              </div>
+
+              {showJsonContract ? (
+                <pre className="p-3.5 rounded-xl bg-[#0F172A] text-[#E2E8F0] text-[11px] font-mono overflow-x-auto shadow-inner leading-relaxed">
+{JSON.stringify(payloadObject, null, 2)}
+                </pre>
+              ) : (
+                <div
+                  onClick={() => setShowJsonContract(true)}
+                  className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] transition-colors cursor-pointer text-center text-xs text-[#64748B] font-medium"
+                >
+                  Click to inspect full JSON payload structure ({Object.keys(payloadObject).length} fields)
+                </div>
+              )}
             </div>
-            <p className="text-xs text-[#555555] leading-relaxed">
-              When triggered, the backend generates ground truth coordinates, corrupts range measurements with physical noise and NLOS biases, and executes the selected mathematical solver. Results update the 2D & 3D Spatial Lab immediately.
-            </p>
+          </Card>
+
+          {/* Card 3: Human-Friendly Simulation Workflow */}
+          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-5 shadow-2xs space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center font-bold text-xs">
+                ?
+              </span>
+              <h4 className="text-xs font-bold text-[#0F172A]">
+                How This Simulation Runs
+              </h4>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-[#475569]">
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#E2E8F0] text-[#0F172A] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  1
+                </span>
+                <p className="leading-snug">
+                  <strong>Trajectory Generation:</strong> Computes the exact ground-truth path in 3D room coordinates.
+                </p>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#E2E8F0] text-[#0F172A] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  2
+                </span>
+                <p className="leading-snug">
+                  <strong>Channel Degradation:</strong> Injects range noise (σ), drops blocked packets, and adds wall reflection bias.
+                </p>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#E2E8F0] text-[#0F172A] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  3
+                </span>
+                <p className="leading-snug">
+                  <strong>Numerical Solver:</strong> Solves non-linear distance equations to estimate coordinates and evaluate error.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

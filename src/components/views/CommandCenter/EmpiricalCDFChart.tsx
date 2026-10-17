@@ -145,13 +145,13 @@ export const EmpiricalCDFChart: React.FC<EmpiricalCDFChartProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-[#E2E8F0]">
       {/* Chart 1: Empirical CDF */}
       <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#E2E8F0]">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-            <span>Error Distribution (Empirical CDF)</span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] truncate">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />
+            <span className="truncate">Cumulative Error Curve</span>
           </div>
-          <span className="text-[10px] font-mono text-[#64748B]">
-            {compareResponse ? 'Backend samples' : 'Empirical fix distribution'}
+          <span className="text-[10px] font-mono text-[#64748B] shrink-0">
+            {compareResponse ? 'Multi-Solver' : 'Active Run'}
           </span>
         </div>
 
@@ -264,13 +264,13 @@ export const EmpiricalCDFChart: React.FC<EmpiricalCDFChartProps> = ({
 
       {/* Chart 2: Positioning Error Over Time */}
       <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#E2E8F0]">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
-            <span>Positioning Error Over Time</span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] truncate">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] shrink-0" />
+            <span className="truncate">Error History</span>
           </div>
-          <span className="text-[10px] font-mono text-[#64748B]">
-            Recent Runs ({chronologicalRuns.length})
+          <span className="text-[10px] font-mono text-[#64748B] shrink-0">
+            Last {chronologicalRuns.length} Runs
           </span>
         </div>
 

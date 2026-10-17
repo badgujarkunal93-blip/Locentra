@@ -828,13 +828,13 @@ export const CommandCenterView: React.FC = () => {
             <table className="w-full text-left text-xs font-mono">
               <thead>
                 <tr className="border-b border-[#E2E8F0] text-[#64748B] text-[10px] uppercase">
-                  <th className="pb-2 font-semibold">#</th>
-                  <th className="pb-2 font-semibold">Algorithm</th>
-                  <th className="pb-2 font-semibold">Category</th>
-                  <th className="pb-2 font-semibold text-right">RMSE (m)</th>
-                  <th className="pb-2 font-semibold text-right">P95 (m)</th>
-                  <th className="pb-2 font-semibold text-right">Time (s)</th>
-                  <th className="pb-2 font-semibold text-right">Convergence</th>
+                  <th className="py-2.5 px-3 font-semibold text-center w-8">#</th>
+                  <th className="py-2.5 px-3 font-semibold text-left">Algorithm</th>
+                  <th className="py-2.5 px-3 font-semibold text-left">Type</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Avg Error (RMSE)</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Worst 5% (P95)</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Latency</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Valid Fix Rate</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F5F9]">
@@ -844,35 +844,38 @@ export const CommandCenterView: React.FC = () => {
                     selectedSolver === 'robust_nls' ? 'bg-[#F0FDF4]' : ''
                   }`}
                 >
-                  <td className="py-2.5 text-[#64748B]">1</td>
-                  <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>Robust NLS</span>
-                    {selectedSolver === 'robust_nls' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" title="Current Active Solver" />
-                    )}
+                  <td className="py-3 px-3 text-center">
+                    <span className="inline-flex w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold items-center justify-center text-[10px]">
+                      1
+                    </span>
                   </td>
-                  <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold">
+                  <td className="py-3 px-3">
+                    <div className="flex items-center gap-2 font-bold text-[#0F172A] whitespace-nowrap">
+                      <span>Robust NLS</span>
+                      {selectedSolver === 'robust_nls' && (
+                        <span className="w-2 h-2 rounded-full bg-[#10B981]" title="Current Active Solver" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold whitespace-nowrap">
                       Optimization
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-[#10B981]">
-                    <span>{compareResponse?.solvers?.robust_nls?.metrics?.rmse_m ? `${compareResponse.solvers.robust_nls.metrics.rmse_m.toFixed(2)}m` : '0.28m'}</span>
-                    <span className="text-xs ml-1 font-normal">↓</span>
+                  <td className="py-3 px-3 text-right font-bold text-[#10B981] tabular-nums whitespace-nowrap">
+                    {compareResponse?.solvers?.robust_nls?.metrics?.rmse_m ? `${compareResponse.solvers.robust_nls.metrics.rmse_m.toFixed(2)}m` : '0.28m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#0F172A]">
-                    <span>{compareResponse?.solvers?.robust_nls?.metrics?.p95_error_m ? `${compareResponse.solvers.robust_nls.metrics.p95_error_m.toFixed(2)}m` : '0.58m'}</span>
-                    <span className="text-xs ml-1 font-normal text-[#64748B]">↓</span>
+                  <td className="py-3 px-3 text-right text-[#0F172A] font-semibold tabular-nums whitespace-nowrap">
+                    {compareResponse?.solvers?.robust_nls?.metrics?.p95_error_m ? `${compareResponse.solvers.robust_nls.metrics.p95_error_m.toFixed(2)}m` : '0.58m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#64748B]">
-                    <span>1.42</span>
-                    <span className="text-xs ml-1 font-normal">↓</span>
+                  <td className="py-3 px-3 text-right text-[#64748B] tabular-nums whitespace-nowrap">
+                    1.42s
                   </td>
-                  <td className="py-2.5 text-right font-semibold text-[#0F172A]">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="py-3 px-3 text-right">
+                    <div className="flex items-center justify-end gap-2 font-semibold text-[#0F172A] tabular-nums whitespace-nowrap">
                       <span>99.8%</span>
-                      <div className="w-10 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                        <div className="w-[99.8%] h-full bg-[#14B8A6] rounded-full" />
+                      <div className="w-12 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
+                        <div className="w-[99.8%] h-full bg-[#10B981] rounded-full" />
                       </div>
                     </div>
                   </td>
@@ -884,30 +887,38 @@ export const CommandCenterView: React.FC = () => {
                     selectedSolver === 'nls_kalman' ? 'bg-[#F0FDF4]' : ''
                   }`}
                 >
-                  <td className="py-2.5 text-[#64748B]">2</td>
-                  <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>Ordinary NLS + Kalman</span>
-                    {selectedSolver === 'nls_kalman' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" title="Current Active Solver" />
-                    )}
+                  <td className="py-3 px-3 text-center">
+                    <span className="inline-flex w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold items-center justify-center text-[10px]">
+                      2
+                    </span>
                   </td>
-                  <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold">
+                  <td className="py-3 px-3">
+                    <div className="flex items-center gap-2 font-bold text-[#0F172A] whitespace-nowrap">
+                      <span>Ordinary NLS + Kalman</span>
+                      {selectedSolver === 'nls_kalman' && (
+                        <span className="w-2 h-2 rounded-full bg-[#3B82F6]" title="Current Active Solver" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] bg-[#EFF6FF] text-[#2563EB] font-sans font-semibold whitespace-nowrap">
                       Filtering
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-[#0F172A]">
+                  <td className="py-3 px-3 text-right font-bold text-[#0F172A] tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.nls_kalman?.metrics?.rmse_m ? `${compareResponse.solvers.nls_kalman.metrics.rmse_m.toFixed(2)}m` : '0.34m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#0F172A]">
+                  <td className="py-3 px-3 text-right text-[#0F172A] font-semibold tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.nls_kalman?.metrics?.p95_error_m ? `${compareResponse.solvers.nls_kalman.metrics.p95_error_m.toFixed(2)}m` : '0.72m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#64748B]">1.85</td>
-                  <td className="py-2.5 text-right font-semibold text-[#0F172A]">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="py-3 px-3 text-right text-[#64748B] tabular-nums whitespace-nowrap">
+                    1.85s
+                  </td>
+                  <td className="py-3 px-3 text-right">
+                    <div className="flex items-center justify-end gap-2 font-semibold text-[#0F172A] tabular-nums whitespace-nowrap">
                       <span>98.6%</span>
-                      <div className="w-10 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                        <div className="w-[98.6%] h-full bg-[#14B8A6] rounded-full" />
+                      <div className="w-12 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
+                        <div className="w-[98.6%] h-full bg-[#10B981] rounded-full" />
                       </div>
                     </div>
                   </td>
@@ -919,30 +930,38 @@ export const CommandCenterView: React.FC = () => {
                     selectedSolver === 'nls' ? 'bg-[#F0FDF4]' : ''
                   }`}
                 >
-                  <td className="py-2.5 text-[#64748B]">3</td>
-                  <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>Ordinary NLS</span>
-                    {selectedSolver === 'nls' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]" title="Current Active Solver" />
-                    )}
+                  <td className="py-3 px-3 text-center">
+                    <span className="inline-flex w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold items-center justify-center text-[10px]">
+                      3
+                    </span>
                   </td>
-                  <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#F1F5F9] text-[#475569] font-sans font-semibold">
+                  <td className="py-3 px-3">
+                    <div className="flex items-center gap-2 font-bold text-[#0F172A] whitespace-nowrap">
+                      <span>Ordinary NLS</span>
+                      {selectedSolver === 'nls' && (
+                        <span className="w-2 h-2 rounded-full bg-[#8B5CF6]" title="Current Active Solver" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] bg-[#F1F5F9] text-[#475569] font-sans font-semibold whitespace-nowrap">
                       Geometric
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-[#0F172A]">
+                  <td className="py-3 px-3 text-right font-bold text-[#0F172A] tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.nls?.metrics?.rmse_m ? `${compareResponse.solvers.nls.metrics.rmse_m.toFixed(2)}m` : '0.41m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#0F172A]">
+                  <td className="py-3 px-3 text-right text-[#0F172A] font-semibold tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.nls?.metrics?.p95_error_m ? `${compareResponse.solvers.nls.metrics.p95_error_m.toFixed(2)}m` : '0.93m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#64748B]">0.98</td>
-                  <td className="py-2.5 text-right font-semibold text-[#0F172A]">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="py-3 px-3 text-right text-[#64748B] tabular-nums whitespace-nowrap">
+                    0.98s
+                  </td>
+                  <td className="py-3 px-3 text-right">
+                    <div className="flex items-center justify-end gap-2 font-semibold text-[#0F172A] tabular-nums whitespace-nowrap">
                       <span>97.2%</span>
-                      <div className="w-10 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                        <div className="w-[97.2%] h-full bg-[#14B8A6] rounded-full" />
+                      <div className="w-12 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
+                        <div className="w-[97.2%] h-full bg-[#10B981] rounded-full" />
                       </div>
                     </div>
                   </td>
@@ -954,30 +973,38 @@ export const CommandCenterView: React.FC = () => {
                     selectedSolver === 'robust_nls_kalman' ? 'bg-[#F0FDF4]' : ''
                   }`}
                 >
-                  <td className="py-2.5 text-[#64748B]">4</td>
-                  <td className="py-2.5 font-bold text-[#0F172A] flex items-center gap-1.5">
-                    <span>Robust NLS + Kalman</span>
-                    {selectedSolver === 'robust_nls_kalman' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" title="Current Active Solver" />
-                    )}
+                  <td className="py-3 px-3 text-center">
+                    <span className="inline-flex w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold items-center justify-center text-[10px]">
+                      4
+                    </span>
                   </td>
-                  <td className="py-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#ECFDF5] text-[#059669] font-sans font-semibold">
+                  <td className="py-3 px-3">
+                    <div className="flex items-center gap-2 font-bold text-[#0F172A] whitespace-nowrap">
+                      <span>Robust NLS + Kalman</span>
+                      {selectedSolver === 'robust_nls_kalman' && (
+                        <span className="w-2 h-2 rounded-full bg-[#10B981]" title="Current Active Solver" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] bg-[#ECFDF5] text-[#059669] font-sans font-semibold whitespace-nowrap">
                       Hybrid
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-[#0F172A]">
+                  <td className="py-3 px-3 text-right font-bold text-[#0F172A] tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.robust_nls_kalman?.metrics?.rmse_m ? `${compareResponse.solvers.robust_nls_kalman.metrics.rmse_m.toFixed(2)}m` : '0.19m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#0F172A]">
+                  <td className="py-3 px-3 text-right text-[#0F172A] font-semibold tabular-nums whitespace-nowrap">
                     {compareResponse?.solvers?.robust_nls_kalman?.metrics?.p95_error_m ? `${compareResponse.solvers.robust_nls_kalman.metrics.p95_error_m.toFixed(2)}m` : '0.44m'}
                   </td>
-                  <td className="py-2.5 text-right text-[#64748B]">1.65</td>
-                  <td className="py-2.5 text-right font-semibold text-[#0F172A]">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="py-3 px-3 text-right text-[#64748B] tabular-nums whitespace-nowrap">
+                    1.65s
+                  </td>
+                  <td className="py-3 px-3 text-right">
+                    <div className="flex items-center justify-end gap-2 font-semibold text-[#0F172A] tabular-nums whitespace-nowrap">
                       <span>99.9%</span>
-                      <div className="w-10 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                        <div className="w-[99.9%] h-full bg-[#14B8A6] rounded-full" />
+                      <div className="w-12 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
+                        <div className="w-[99.9%] h-full bg-[#10B981] rounded-full" />
                       </div>
                     </div>
                   </td>
@@ -1055,20 +1082,32 @@ export const CommandCenterView: React.FC = () => {
               return (
                 <div
                   key={anchor.id}
-                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 flex flex-col justify-between hover:border-[#CBD5E1] transition-colors shadow-2xs"
+                  className="bg-white border border-[#E2E8F0] rounded-xl p-3 flex flex-col justify-between hover:border-[#CBD5E1] transition-all shadow-2xs"
                 >
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-[#0F172A]">
+                  <div className="flex items-center justify-between gap-1 mb-2">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-[#0F172A]">
                       <span className={`w-2 h-2 rounded-full ${isAmber ? 'bg-[#F59E0B]' : 'bg-[#10B981]'}`} />
-                      <span>{anchor.id} ({posLabel})</span>
+                      <span>{anchor.id}</span>
+                      <span className="text-[#64748B] font-normal text-[11px]">({posLabel})</span>
                     </div>
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                      isAmber ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                    }`}>
+                      {isAmber ? 'NLOS Delay' : 'Clear Line'}
+                    </span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#64748B]">
-                    ({anchor.x.toFixed(1)}, {anchor.y.toFixed(1)}, {(anchor.z ?? 2.8).toFixed(1)})
+
+                  <div className="bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg px-2 py-1.5 flex items-center justify-between text-[11px] font-mono text-[#334155] my-1">
+                    <span>X {anchor.x.toFixed(1)}m</span>
+                    <span className="text-[#CBD5E1]">•</span>
+                    <span>Y {anchor.y.toFixed(1)}m</span>
+                    <span className="text-[#CBD5E1]">•</span>
+                    <span>Z {(anchor.z ?? 2.8).toFixed(1)}m</span>
                   </div>
-                  <div className="text-[10px] font-mono text-[#64748B] mt-1 pt-1 border-t border-[#E2E8F0] flex items-center justify-between">
-                    <span>NLOS:</span>
-                    <span className={isAmber ? 'text-[#D97706] font-bold' : 'text-[#64748B] font-bold'}>{nlosRate}</span>
+
+                  <div className="text-[11px] text-[#64748B] mt-1 pt-1.5 border-t border-[#F1F5F9] flex items-center justify-between">
+                    <span className="text-[10px]">Signal Loss</span>
+                    <span className={`font-mono font-bold ${isAmber ? 'text-[#D97706]' : 'text-[#16A34A]'}`}>{nlosRate}</span>
                   </div>
                 </div>
               );

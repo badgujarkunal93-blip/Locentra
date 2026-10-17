@@ -370,13 +370,15 @@ export const LiveSpatialCanvas2D: React.FC<LiveSpatialCanvas2DProps> = ({
 
         {/* Current Position Telemetry Box */}
         <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs font-mono">
-          <div className="flex items-center justify-between text-[11px] text-[#16A34A] font-bold mb-2">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" />
+          <div className="flex items-center justify-between text-[11px] font-bold mb-2">
+            <div className="flex items-center gap-1.5 text-[#0F172A]">
+              <span className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-[#16A34A] animate-pulse' : 'bg-[#94A3B8]'}`} />
               <span>Current Position</span>
             </div>
-            <span className="text-[9px] px-1.5 py-0.5 bg-[#DCFCE7] text-[#15803D] rounded-full">
-              LIVE
+            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+              isLiveUpdating ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#F1F5F9] text-[#64748B]'
+            }`}>
+              {isLiveUpdating ? 'LIVE' : 'DEMO'}
             </span>
           </div>
 
