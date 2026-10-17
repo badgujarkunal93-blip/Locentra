@@ -177,12 +177,45 @@ const WarehouseEnvironment: React.FC<{
   );
 };
 
+// Helper Component: Animated Range Ray from Anchor to Target Pos (Direct WebGL buffer update, 0 React re-renders)
+const AnchorRay: React.FC<{
+  anchorPos: THREE.Vector3;
+  targetPosRef: React.MutableRefObject<THREE.Vector3>;
+  mode: EngineMode;
+}> = ({ anchorPos, targetPosRef, mode }) => {
+  const lineObj = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+    const mat = new THREE.LineBasicMaterial({
+      color: mode === 'ols' ? '#EF4444' : '#10B981',
+      transparent: true,
+      opacity: mode === 'ols' ? 0.35 : 0.45,
+    });
+    return new THREE.Line(g, mat);
+  }, []);
+
+  useFrame(() => {
+    const posAttr = lineObj.geometry.attributes.position as THREE.BufferAttribute;
+    if (posAttr) {
+      const t = targetPosRef.current;
+      posAttr.setXYZ(0, 0, 0, 0);
+      posAttr.setXYZ(1, t.x - anchorPos.x, t.y - anchorPos.y, t.z - anchorPos.z);
+      posAttr.needsUpdate = true;
+    }
+    const mat = lineObj.material as THREE.LineBasicMaterial;
+    mat.color.set(mode === 'ols' ? '#EF4444' : '#10B981');
+    mat.opacity = mode === 'ols' ? 0.35 : 0.45;
+  });
+
+  return <primitive object={lineObj} />;
+};
+
 // Subcomponent: 4 Wall Radio Anchors with Status Rings
 const RadioAnchors: React.FC<{ 
   mode: EngineMode; 
   hoverPoint: THREE.Vector3 | null;
-  targetPos: THREE.Vector3;
-}> = ({ mode, hoverPoint, targetPos }) => {
+  targetPosRef: React.MutableRefObject<THREE.Vector3>;
+}> = ({ mode, hoverPoint, targetPosRef }) => {
   return (
     <group>
       {ANCHORS.map((anchor) => {
@@ -238,21 +271,12 @@ const RadioAnchors: React.FC<{
               </Text>
             </Billboard>
 
-            {/* Range Ray to Target Object */}
-            <line>
-              <bufferGeometry
-                attach="geometry"
-                {...new THREE.BufferGeometry().setFromPoints([
-                  new THREE.Vector3(0, 0, 0),
-                  targetPos.clone().sub(anchorPos),
-                ])}
-              />
-              <lineBasicMaterial 
-                color={mode === 'ols' ? '#EF4444' : '#10B981'} 
-                transparent 
-                opacity={mode === 'ols' ? 0.35 : 0.45} 
-              />
-            </line>
+            {/* Range Ray to Target Object - High performance GPU line buffer */}
+            <AnchorRay 
+              anchorPos={anchorPos} 
+              targetPosRef={targetPosRef} 
+              mode={mode} 
+            />
 
             {/* Ray to Hover Probe */}
             {hoverPoint && (
@@ -281,19 +305,17 @@ const RadioAnchors: React.FC<{
 // Subcomponent: Autonomous Asset Pod & Dual-Engine Trajectory
 const RoverAndTrajectory: React.FC<{
   mode: EngineMode;
+  targetPosRef: React.MutableRefObject<THREE.Vector3>;
   onTelemetryUpdate: (telemetry: {
-    x: number;
-    y: number;
-    z: number;
-    dop: number;
-    huberWeight: number;
-    isGlitching: boolean;
-    nlosSpikeMagnitude: number;
+    x: string;
+    y: string;
+    dop: string;
+    huberWeight: string;
   }) => void;
-  onTargetPosChange: (pos: THREE.Vector3) => void;
-}> = ({ mode, onTelemetryUpdate, onTargetPosChange }) => {
+}> = ({ mode, targetPosRef, onTelemetryUpdate }) => {
   const roverGroupRef = useRef<THREE.Group>(null);
   const timeRef = useRef(0);
+  const lastUpdateRef = useRef(0);
 
   const curve = useMemo(() => {
     const points = WAYPOINTS.map(([x, z]) => new THREE.Vector3(x, 0.4, z));
@@ -304,36 +326,34 @@ const RoverAndTrajectory: React.FC<{
     return curve.getPoints(160);
   }, [curve]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     timeRef.current += delta * 0.45;
     const progress = (timeRef.current % 10) / 10;
     
     const idealPos = curve.getPointAt(progress);
     const tangent = curve.getTangentAt(progress);
 
-    let displayPos = idealPos.clone();
+    const displayPos = idealPos.clone();
     let isGlitching = false;
-    let spikeMag = 0;
 
     if (mode === 'ols') {
       const nearBarrier = idealPos.x > -3.5 && idealPos.x < 0.5 && idealPos.z > -2.0 && idealPos.z < 2.5;
       
       if (nearBarrier) {
         isGlitching = true;
-        const glitchX = (Math.sin(timeRef.current * 42) > 0.3 ? 1 : -1) * (2.8 + Math.sin(timeRef.current * 18) * 1.5);
-        const glitchZ = (Math.cos(timeRef.current * 36) > 0.2 ? 1 : -1) * (2.2 + Math.cos(timeRef.current * 24) * 1.2);
+        // Smooth multipath reflection deflection instead of high-frequency seizure
+        const glitchX = 2.2 * Math.sin(timeRef.current * 3.5);
+        const glitchZ = 1.6 * Math.cos(timeRef.current * 3.5);
         displayPos.x += glitchX;
         displayPos.z += glitchZ;
-        displayPos.y = 0.4 + Math.sin(timeRef.current * 30) * 0.25;
-        spikeMag = Math.sqrt(glitchX * glitchX + glitchZ * glitchZ);
       } else {
-        displayPos.x += (Math.random() - 0.5) * 0.35;
-        displayPos.z += (Math.random() - 0.5) * 0.35;
+        displayPos.x += Math.sin(timeRef.current * 3) * 0.12;
+        displayPos.z += Math.cos(timeRef.current * 3) * 0.12;
       }
     } else {
-      // Locentra smooth Huber path
-      displayPos.x += Math.sin(timeRef.current * 10) * 0.02;
-      displayPos.z += Math.cos(timeRef.current * 10) * 0.02;
+      // Locentra smooth Huber path accurately tracking the trajectory
+      displayPos.x += Math.sin(timeRef.current * 2) * 0.015;
+      displayPos.z += Math.cos(timeRef.current * 2) * 0.015;
     }
 
     if (roverGroupRef.current) {
@@ -344,19 +364,33 @@ const RoverAndTrajectory: React.FC<{
       }
     }
 
-    onTargetPosChange(displayPos);
+    targetPosRef.current.copy(displayPos);
 
-    const dop = mode === 'ols' ? 4.82 + Math.random() * 2.5 : 1.12 + Math.random() * 0.04;
-    const huberWeight = mode === 'ols' ? 0.12 : 0.98;
-    onTelemetryUpdate({
-      x: parseFloat((displayPos.x + 7.0).toFixed(2)),
-      y: parseFloat((displayPos.z + 5.0).toFixed(2)),
-      z: 1.05,
-      dop: parseFloat(dop.toFixed(2)),
-      huberWeight: parseFloat(huberWeight.toFixed(2)),
-      isGlitching,
-      nlosSpikeMagnitude: parseFloat(spikeMag.toFixed(2)),
-    });
+    // Throttle HUD telemetry update to a stable, readable ~5Hz (every 200ms)
+    // This prevents React re-render thrashing, text vibration, and visual glitching
+    if (state.clock.elapsedTime - lastUpdateRef.current > 0.2) {
+      lastUpdateRef.current = state.clock.elapsedTime;
+      
+      const r = Math.hypot(displayPos.x, displayPos.z);
+      const dopVal = mode === 'ols' 
+        ? (isGlitching ? 4.92 : 3.65)
+        : (1.10 + (r / 7.0) * 0.12);
+
+      const huberVal = mode === 'ols' 
+        ? 0.12 
+        : (isGlitching ? 0.86 : 0.98);
+
+      // Coordinate mapping into 14m x 10m room
+      const roomX = Math.max(0.5, Math.min(13.5, displayPos.x + 7.0));
+      const roomY = Math.max(0.5, Math.min(9.5, displayPos.z + 5.0));
+
+      onTelemetryUpdate({
+        x: roomX.toFixed(2),
+        y: roomY.toFixed(2),
+        dop: dopVal.toFixed(2),
+        huberWeight: huberVal.toFixed(2),
+      });
+    }
   });
 
   return (
@@ -443,18 +477,15 @@ const RoverAndTrajectory: React.FC<{
 export const Hero3DCanvas: React.FC = () => {
   const [engineMode, setEngineMode] = useState<EngineMode>('locentra');
   const [hoverPoint, setHoverPoint] = useState<THREE.Vector3 | null>(null);
-  const [targetPos, setTargetPos] = useState<THREE.Vector3>(new THREE.Vector3(0, 0.4, 0));
+  const targetPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0.4, 0));
   const [cameraPreset, setCameraPreset] = useState<'iso' | 'top'>('iso');
   const controlsRef = useRef<any>(null);
 
   const [telemetry, setTelemetry] = useState({
-    x: 12.42,
-    y: 8.19,
-    z: 1.05,
-    dop: 1.12,
-    huberWeight: 0.98,
-    isGlitching: false,
-    nlosSpikeMagnitude: 0,
+    x: '5.92',
+    y: '7.82',
+    dop: '1.14',
+    huberWeight: '0.98',
   });
 
   const hoverDistances = useMemo(() => {
@@ -563,41 +594,41 @@ export const Hero3DCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* BOTTOM LEFT: Conceptual Telemetry Card */}
-      <div className="absolute bottom-4 left-4 z-20 p-3 rounded-xl bg-white/95 border border-[#EAEAEA] backdrop-blur-md shadow-lg max-w-xs sm:max-w-md">
-        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100 text-[11px] font-mono">
-          <div className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${engineMode === 'locentra' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-            <span className="font-bold text-[#171717]">Conceptual Demonstration HUD</span>
+      {/* BOTTOM LEFT: Conceptual Demonstration HUD Card — Fixed, stable container with smooth demo value updates */}
+      <div className="absolute bottom-4 left-4 z-20 w-[310px] sm:w-[440px] p-3 rounded-2xl bg-white/95 border border-[#EAEAEA] backdrop-blur-md shadow-md select-none">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[11px] font-mono">
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${engineMode === 'locentra' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            <span className="font-bold text-[#171717] text-xs">Conceptual Demonstration HUD</span>
           </div>
-          <span className="text-slate-400 text-[10px]">14m × 10m Testbed</span>
+          <span className="text-slate-400 font-mono text-[10px] tracking-tight shrink-0">14m × 10m Testbed</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]">
-            <span className="text-[9px] text-[#71717A] block uppercase">Coords</span>
-            <span className="font-bold text-[#171717] text-[11px]">
+          <div className="bg-[#F8F9FA] p-2 rounded-xl border border-[#EAEAEA] flex flex-col justify-between min-w-0">
+            <span className="text-[9px] text-[#71717A] block uppercase font-semibold tracking-wider mb-1">Coords</span>
+            <span className="font-bold text-[#171717] text-[11px] tabular-nums truncate">
               {telemetry.x}m, {telemetry.y}m
             </span>
           </div>
 
-          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]">
-            <span className="text-[9px] text-[#71717A] block uppercase">DOP</span>
-            <span className={`font-bold text-[11px] ${telemetry.dop > 3.0 ? 'text-rose-600' : 'text-emerald-700'}`}>
+          <div className="bg-[#F8F9FA] p-2 rounded-xl border border-[#EAEAEA] flex flex-col justify-between min-w-0">
+            <span className="text-[9px] text-[#71717A] block uppercase font-semibold tracking-wider mb-1">DOP</span>
+            <span className={`font-bold text-[11px] tabular-nums ${Number(telemetry.dop) > 3.0 ? 'text-rose-600' : 'text-emerald-700'}`}>
               {telemetry.dop}
             </span>
           </div>
 
-          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]">
-            <span className="text-[9px] text-[#71717A] block uppercase">Huber Weight</span>
-            <span className={`font-bold text-[11px] ${engineMode === 'locentra' ? 'text-emerald-700' : 'text-rose-600'}`}>
+          <div className="bg-[#F8F9FA] p-2 rounded-xl border border-[#EAEAEA] flex flex-col justify-between min-w-0">
+            <span className="text-[9px] text-[#71717A] block uppercase font-semibold tracking-wider mb-1">Huber Weight</span>
+            <span className={`font-bold text-[11px] tabular-nums ${engineMode === 'locentra' ? 'text-emerald-700' : 'text-rose-600'}`}>
               {telemetry.huberWeight}
             </span>
           </div>
 
-          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]" title="Benchmark solver computation time on reference hardware">
-            <span className="text-[9px] text-[#71717A] block uppercase">Solver Time</span>
-            <span className="font-bold text-[#171717] text-[11px]">
+          <div className="bg-[#F8F9FA] p-2 rounded-xl border border-[#EAEAEA] flex flex-col justify-between min-w-0" title="Benchmark solver computation time on reference hardware">
+            <span className="text-[9px] text-[#71717A] block uppercase font-semibold tracking-wider mb-1">Solver Time</span>
+            <span className="font-bold text-[#171717] text-[11px] tabular-nums">
               ~1.4ms ref
             </span>
           </div>
@@ -649,13 +680,13 @@ export const Hero3DCanvas: React.FC = () => {
         <RadioAnchors 
           mode={engineMode} 
           hoverPoint={hoverPoint}
-          targetPos={targetPos}
+          targetPosRef={targetPosRef}
         />
 
         <RoverAndTrajectory 
           mode={engineMode} 
+          targetPosRef={targetPosRef}
           onTelemetryUpdate={setTelemetry}
-          onTargetPosChange={setTargetPos}
         />
       </Canvas>
     </div>
