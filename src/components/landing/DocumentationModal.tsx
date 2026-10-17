@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, CheckCheck, BookOpen, Terminal, Network, Cpu } from 'lucide-react';
+import { X, Copy, CheckCheck, BookOpen, Terminal, Network, Cpu, Code2 } from 'lucide-react';
 
 interface DocumentationModalProps {
   isOpen: boolean;
@@ -10,15 +10,15 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'quickstart' | 'websocket' | 'solver'>('quickstart');
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'endpoints' | 'python' | 'solvers'>('endpoints');
+  const [copied, setCopied] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const copyCode = (text: string) => {
+  const copyCode = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   return (
@@ -33,10 +33,10 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-[#171717] font-mono tracking-tight">
-                LOCENTRA ENGINE SDK & API DOCUMENTATION
+                LOCENTRA BACKEND API &amp; SIMULATION DOCUMENTATION
               </h3>
               <p className="text-xs text-[#52525B]">
-                Integration Reference for High-Performance Indoor RTLS
+                FastAPI Numerical Positioning Engine Reference (v0.1.0)
               </p>
             </div>
           </div>
@@ -52,171 +52,197 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({
         {/* Tab switch */}
         <div className="flex items-center gap-2 px-5 pt-3 border-b border-[#EAEAEA] bg-white font-mono text-xs">
           <button
-            onClick={() => setActiveTab('quickstart')}
+            onClick={() => setActiveTab('endpoints')}
             className={`flex items-center gap-1.5 px-3.5 py-2.5 border-b-2 font-bold transition-colors cursor-pointer ${
-              activeTab === 'quickstart' 
-                ? 'border-[#232124] text-[#171717] bg-[#F8F9FA]/50 rounded-t-lg' 
-                : 'border-transparent text-[#71717A] hover:text-[#171717]'
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5 text-[#52525B]" />
-            <span>Python / C++ SDK</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('websocket')}
-            className={`flex items-center gap-1.5 px-3.5 py-2.5 border-b-2 font-bold transition-colors cursor-pointer ${
-              activeTab === 'websocket' 
+              activeTab === 'endpoints' 
                 ? 'border-[#232124] text-[#171717] bg-[#F8F9FA]/50 rounded-t-lg' 
                 : 'border-transparent text-[#71717A] hover:text-[#171717]'
             }`}
           >
             <Network className="w-3.5 h-3.5 text-[#52525B]" />
-            <span>WebSocket Telemetry Stream</span>
+            <span>FastAPI Endpoints</span>
           </button>
           <button
-            onClick={() => setActiveTab('solver')}
+            onClick={() => setActiveTab('python')}
             className={`flex items-center gap-1.5 px-3.5 py-2.5 border-b-2 font-bold transition-colors cursor-pointer ${
-              activeTab === 'solver' 
+              activeTab === 'python' 
+                ? 'border-[#232124] text-[#171717] bg-[#F8F9FA]/50 rounded-t-lg' 
+                : 'border-transparent text-[#71717A] hover:text-[#171717]'
+            }`}
+          >
+            <Terminal className="w-3.5 h-3.5 text-[#52525B]" />
+            <span>Python Client &amp; Local Setup</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('solvers')}
+            className={`flex items-center gap-1.5 px-3.5 py-2.5 border-b-2 font-bold transition-colors cursor-pointer ${
+              activeTab === 'solvers' 
                 ? 'border-[#232124] text-[#171717] bg-[#F8F9FA]/50 rounded-t-lg' 
                 : 'border-transparent text-[#71717A] hover:text-[#171717]'
             }`}
           >
             <Cpu className="w-3.5 h-3.5 text-[#52525B]" />
-            <span>Solver Architecture & Config</span>
+            <span>Numerical Solvers</span>
           </button>
         </div>
 
         {/* Content body */}
         <div className="p-6 overflow-y-auto space-y-4 text-xs font-mono text-[#232124] bg-[#FAFAFA]">
-          {activeTab === 'quickstart' && (
+          {activeTab === 'endpoints' && (
             <div className="space-y-4">
               <p className="text-[#52525B] font-sans text-xs">
-                Install the high-speed Python bindings with native SciPy/NumPy JIT optimizations:
+                The Locentra backend is a RESTful FastAPI service executing SciPy non-linear optimization and Kalman tracking:
               </p>
               
-              {/* Install Command */}
+              <div className="space-y-3">
+                {/* Endpoint 1: Health */}
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">GET</span>
+                      <span className="font-bold text-[#171717]">/health</span>
+                    </div>
+                    <span className="text-[11px] text-[#71717A]">Health &amp; Engine Status</span>
+                  </div>
+                  <p className="text-[11px] font-sans text-[#52525B]">
+                    Returns service status, version (<code className="bg-slate-100 px-1 py-0.5 rounded">0.1.0</code>), and backend engine identity.
+                  </p>
+                </div>
+
+                {/* Endpoint 2: Default Config */}
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">GET</span>
+                      <span className="font-bold text-[#171717]">/api/v1/config/default</span>
+                    </div>
+                    <span className="text-[11px] text-[#71717A]">Canonical Testbed Geometry</span>
+                  </div>
+                  <p className="text-[11px] font-sans text-[#52525B]">
+                    Returns canonical 12m × 8m room geometry, 6 default ceiling anchors, and standard simulation parameters.
+                  </p>
+                </div>
+
+                {/* Endpoint 3: Run Simulation */}
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">POST</span>
+                      <span className="font-bold text-[#171717]">/api/v1/simulations/run</span>
+                    </div>
+                    <span className="text-[11px] text-[#71717A]">Single Solver Run</span>
+                  </div>
+                  <p className="text-[11px] font-sans text-[#52525B]">
+                    Simulates corrupted distance observations and estimates positions using <code className="bg-slate-100 px-1 py-0.5 rounded">robust_nls</code>, <code className="bg-slate-100 px-1 py-0.5 rounded">nls</code>, <code className="bg-slate-100 px-1 py-0.5 rounded">robust_nls_kalman</code>, or <code className="bg-slate-100 px-1 py-0.5 rounded">nls_kalman</code>.
+                  </p>
+                </div>
+
+                {/* Endpoint 4: Compare Solvers */}
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-bold">POST</span>
+                      <span className="font-bold text-[#171717]">/api/v1/simulations/compare</span>
+                    </div>
+                    <span className="text-[11px] text-[#71717A]">Multi-Solver Benchmark</span>
+                  </div>
+                  <p className="text-[11px] font-sans text-[#52525B]">
+                    Runs Ordinary NLS, Robust NLS, and Kalman tracking side-by-side on identical synthetic range observations to compare RMSE, P95 error, and valid-estimate rate.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'python' && (
+            <div className="space-y-4">
+              <p className="text-[#52525B] font-sans text-xs">
+                To run the numerical positioning backend locally or interact via Python:
+              </p>
+              
+              {/* Local Backend Command */}
               <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] flex items-center justify-between shadow-xs">
-                <span className="text-[#171717] font-bold">pip install locentra-engine</span>
+                <span className="text-[#171717] font-bold">cd backend && uvicorn main:app --reload --port 8000</span>
                 <button
-                  onClick={() => copyCode('pip install locentra-engine')}
+                  onClick={() => copyCode('cd backend && uvicorn main:app --reload --port 8000', 'run-backend')}
                   className="p-1.5 rounded-md hover:bg-[#F8F9FA] text-[#71717A] hover:text-[#171717] transition-colors cursor-pointer"
                   title="Copy command"
                 >
-                  {copied ? <CheckCheck className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  {copied === 'run-backend' ? <CheckCheck className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
 
               {/* Code Snippet Box */}
               <div className="p-4 rounded-xl bg-[#171717] border border-[#262626] text-white space-y-2 shadow-xs">
                 <div className="flex items-center justify-between pb-2 border-b border-white/10 text-[11px] text-[#A1A1AA]">
-                  <span className="font-sans font-medium">Python Integration Example</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-[#D9F56F]">main.py</span>
+                  <span className="font-sans font-medium">Python API Request Example (requests)</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-[#D9F56F]">simulate.py</span>
                 </div>
                 <pre className="text-[#E4E4E7] overflow-x-auto leading-relaxed pt-1 font-mono text-[11.5px]">
-{`from locentra import LocentraSolver, RoomEnvironment
+{`import requests
 
-# Initialize 14m x 10m warehouse coordinate bounds
-env = RoomEnvironment(width=14.0, length=10.0, height=4.0)
-env.add_anchors([
-    {"id": "A1", "x": -6.0, "y": 3.2, "z": -4.0},
-    {"id": "A2", "x": 6.0,  "y": 3.2, "z": -4.0},
-    {"id": "A3", "x": 6.0,  "y": 3.2, "z": 4.0},
-    {"id": "A4", "x": -6.0, "y": 3.2, "z": 4.0},
-])
-
-# Configure Huber robust loss (delta=0.8m) + Kalman kinematics
-solver = LocentraSolver(
-    loss="huber", 
-    f_scale=0.8, 
-    enable_ekf=True, 
-    max_dop_threshold=6.0
+# Execute positioning simulation on local FastAPI engine
+response = requests.post(
+    "http://127.0.0.1:8000/api/v1/simulations/run",
+    json={
+        "solver": "robust_nls_kalman",
+        "trajectory_type": "closed_loop",
+        "num_points": 80,
+        "noise_std_dev": 0.15,
+        "dropout_rate": 0.05,
+        "nlos_rate": 0.10,
+        "nlos_bias_mean": 0.50,
+        "seed": 42
+    }
 )
 
-# Stream raw UWB time-of-flight ranges in real-time
-position = solver.solve_ranges({
-    "A1": 5.42, "A2": 8.19, "A3": 9.04, "A4": 4.31
-})
-
-print(f"X: {position.x:.2f}m, Y: {position.y:.2f}m, DOP: {position.dop:.2f}")`}
+data = response.json()
+metrics = data["metrics"]
+print(f"Algorithm: {data['algorithm_name']}")
+print(f"RMSE: {metrics['rmse_m']:.3f} m")
+print(f"P95 Error: {metrics['p95_error_m']:.3f} m")
+print(f"Valid Rate: {metrics['valid_estimate_rate'] * 100:.1f}%")`}
                 </pre>
               </div>
             </div>
           )}
 
-          {activeTab === 'websocket' && (
+          {activeTab === 'solvers' && (
             <div className="space-y-4">
               <p className="text-[#52525B] font-sans text-xs">
-                Connect your AMR fleet to the high-frequency 700Hz WebSocket positioning telemetry broadcast:
-              </p>
-              
-              <div className="p-3.5 rounded-xl bg-white border border-[#EAEAEA] flex items-center justify-between shadow-xs">
-                <span className="text-[#171717] font-bold">wss://locentra.app/api/v1/stream/telemetry</span>
-                <button
-                  onClick={() => copyCode('wss://locentra.app/api/v1/stream/telemetry')}
-                  className="p-1.5 rounded-md hover:bg-[#F8F9FA] text-[#71717A] hover:text-[#171717] transition-colors cursor-pointer"
-                  title="Copy endpoint"
-                >
-                  {copied ? <CheckCheck className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#171717] border border-[#262626] text-white space-y-2 shadow-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-white/10 text-[11px] text-[#A1A1AA]">
-                  <span className="font-sans font-medium">JSON Frame Output Contract</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-[#D9F56F]">telemetry.json</span>
-                </div>
-                <pre className="text-[#E4E4E7] overflow-x-auto leading-relaxed pt-1 font-mono text-[11.5px]">
-{`{
-  "timestamp_ns": 1728775200000000,
-  "sequence_id": 89402,
-  "tag_id": "AMR-ROVER-04",
-  "coordinates": { "x": 12.42, "y": 8.19, "z": 1.05 },
-  "velocity": { "vx": 0.85, "vy": 0.12, "vz": 0.00 },
-  "confidence": {
-    "dop": 1.12,
-    "rmse_estimate_meters": 0.24,
-    "huber_weights": { "A1": 0.98, "A2": 0.95, "A3": 0.12, "A4": 0.99 }
-  },
-  "flags": {
-    "nlos_detected": true,
-    "occluded_anchor": "A3",
-    "kinematic_bridging": false
-  }
-}`}
-                </pre>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'solver' && (
-            <div className="space-y-4">
-              <p className="text-[#52525B] font-sans text-xs">
-                Locentra supports 4 interchangeable positioning engines depending on real-time hardware constraints:
+                Mathematical formulation of the 4 numerical methods implemented in the backend:
               </p>
               <div className="space-y-3 font-sans">
                 <div className="p-4 rounded-xl bg-white border border-[#D9F56F] shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#171717] text-sm">1. Robust Huber NLS</span>
+                    <span className="font-bold text-[#171717] text-sm">1. Robust Huber NLS (solve_robust_nls)</span>
                     <span className="px-2 py-0.5 rounded-full bg-[#F8FDE8] text-[#232124] text-[10px] font-bold border border-[#D9F56F]">
-                      Recommended
+                      Primary Outlier Damping
                     </span>
                   </div>
                   <p className="text-[#52525B] text-xs mt-1.5 leading-relaxed">
-                    Ideal for dense warehouse multipath. Downweights positive distance outliers caused by reflections off metal racks without destabilizing state continuity.
+                    Uses Huber piecewise loss in <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">scipy.optimize.least_squares</code>. For small residuals (|r| ≤ δ), loss is quadratic; for large residuals, it scales linearly, preventing severe multipath bounces from destabilizing the coordinate solve.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white border border-[#EAEAEA] shadow-xs">
-                  <span className="font-bold text-[#171717] text-sm">2. Extended Kalman Filter (EKF)</span>
+                  <span className="font-bold text-[#171717] text-sm">2. Ordinary Non-Linear Least Squares (solve_nls)</span>
                   <p className="text-[#52525B] text-xs mt-1.5 leading-relaxed">
-                    Provides continuous kinematics for fast AMRs (up to 3 m/s) with 30%+ anchor packet dropouts through 9-state velocity extrapolation.
+                    Standard unweighted least-squares optimization using the Levenberg-Marquardt or trust-region algorithm. Minimizes the sum of squared range residuals Σ (||p - a_i|| - d_i)². Accurate under Gaussian line-of-sight noise, but sensitive to obstacle outliers.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white border border-[#EAEAEA] shadow-xs">
-                  <span className="font-bold text-[#171717] text-sm">3. Levenberg-Marquardt Classical NLLS</span>
+                  <span className="font-bold text-[#171717] text-sm">3. Kinematic Kalman Filtering (KalmanTracker)</span>
                   <p className="text-[#52525B] text-xs mt-1.5 leading-relaxed">
-                    Standard non-linear least squares optimization with numerical damping for clean line-of-sight environments.
+                    A constant-velocity linear Kalman filter that tracks 2D state [x, y, vx, vy]. Propagates motion state across missing observations when anchor dropouts leave fewer than 3 active range measurements.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-[#EAEAEA] shadow-xs">
+                  <span className="font-bold text-[#171717] text-sm">4. Known Research Limitation: Sparse Collinear Geometry</span>
+                  <p className="text-[#52525B] text-xs mt-1.5 leading-relaxed">
+                    In degenerate arrangements (such as anchors placed along a single line or narrow corridor with sparse coverage), robust estimators can occasionally downweight critical geometric constraints, leading to higher error than OLS. Locentra openly evaluates this failure case in its benchmark suite.
                   </p>
                 </div>
               </div>
@@ -227,7 +253,7 @@ print(f"X: {position.x:.2f}m, Y: {position.y:.2f}m, DOP: {position.dop:.2f}")`}
         {/* Footer */}
         <div className="p-4 border-t border-[#EAEAEA] bg-white flex items-center justify-between">
           <span className="text-[11px] text-[#71717A] font-mono">
-            Locentra Core Engine API v2.4
+            FastAPI Backend Specification · Python 3.11+ · SciPy Solvers
           </span>
           <button
             onClick={onClose}
@@ -241,3 +267,4 @@ print(f"X: {position.x:.2f}m, Y: {position.y:.2f}m, DOP: {position.dop:.2f}")`}
     </div>
   );
 };
+

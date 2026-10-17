@@ -563,14 +563,14 @@ export const Hero3DCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* BOTTOM LEFT: Live Telemetry Card */}
+      {/* BOTTOM LEFT: Conceptual Telemetry Card */}
       <div className="absolute bottom-4 left-4 z-20 p-3 rounded-xl bg-white/95 border border-[#EAEAEA] backdrop-blur-md shadow-lg max-w-xs sm:max-w-md">
         <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100 text-[11px] font-mono">
           <div className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${engineMode === 'locentra' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-            <span className="font-bold text-[#171717]">Live Telemetry</span>
+            <span className="font-bold text-[#171717]">Conceptual Demonstration HUD</span>
           </div>
-          <span className="text-slate-400 text-[10px]">714 Hz Stream</span>
+          <span className="text-slate-400 text-[10px]">14m × 10m Testbed</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
@@ -595,10 +595,10 @@ export const Hero3DCanvas: React.FC = () => {
             </span>
           </div>
 
-          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]">
-            <span className="text-[9px] text-[#71717A] block uppercase">Latency</span>
+          <div className="bg-[#F8F9FA] p-1.5 rounded-lg border border-[#EAEAEA]" title="Benchmark solver computation time on reference hardware">
+            <span className="text-[9px] text-[#71717A] block uppercase">Solver Time</span>
             <span className="font-bold text-[#171717] text-[11px]">
-              1.4ms
+              ~1.4ms ref
             </span>
           </div>
         </div>

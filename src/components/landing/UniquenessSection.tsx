@@ -27,98 +27,98 @@ export interface UniquenessFeature {
 export const UNIQUENESS_FEATURES: UniquenessFeature[] = [
   {
     id: 'huber-nlos',
-    title: 'Adaptive Huber Outlier Clamping',
+    title: 'Adaptive Huber Outlier Loss',
     category: 'Signal Robustness',
     icon: ShieldCheck,
-    metric: '100%',
-    metricLabel: 'NLOS Outlier Clamping',
-    tagline: 'Piecewise L1 robust downweighting stops multipath wall reflections from corrupting coordinates.',
-    description: 'Conventional quadratic least-squares estimators explode when signals bounce off concrete or metallic barriers. Locentra dynamically identifies high-residual rays and transitions them to an L1 linear penalty, preserving valuable geometry without dropping anchor packets.',
+    metric: 'Adaptive',
+    metricLabel: 'Residual Downweighting',
+    tagline: 'Piecewise M-estimation reduces the distorting influence of obstacle-delayed distance measurements.',
+    description: 'Conventional quadratic least-squares estimators square large residuals, causing estimates to jump when signals bounce off walls. Locentra applies an adaptive Huber loss function that transitions from quadratic penalty for small residuals to linear penalty for large residuals. This dampens the influence of obstacle-delayed signals without dropping valid geometric data.',
     technicalDetails: [
-      'Piecewise loss function with adaptive Huber threshold δ calculated per-cluster',
-      'Zero packet dropping: preserves inlier range data while mitigating multipath delays',
-      'Tested against dense reinforced concrete partitions and metallic racking'
+      'Piecewise loss function with adaptive Huber threshold δ calculated per-residual',
+      'Continuous downweighting: preserves inlier range geometry while attenuating multipath spikes',
+      'Realistic assessment: reduces error under NLOS bias without claiming 100% outlier elimination'
     ],
     equation: 'L_δ(r) = (r²)/2 for |r| ≤ δ, else δ(|r| - δ/2)'
   },
   {
     id: 'kinematic-ekf',
-    title: 'Kinematic Blackout Bridging',
+    title: 'Kinematic Kalman Motion Tracking',
     category: 'Continuity & Kinematics',
     icon: Activity,
-    metric: '30%+',
-    metricLabel: 'Anchor Dropout Tolerance',
-    tagline: '9-state kinematic covariance propagation preserves smooth trajectories through RF blind spots.',
-    description: 'When physical warehouse columns block line-of-sight to anchors, standard positioning engines freeze or return "NaN". Locentra’s 9-state Extended Kalman Filter maintains velocity and acceleration state matrices, bridging blind spans without jitter or cumulative drift.',
+    metric: 'Constant-V',
+    metricLabel: 'State Covariance Model',
+    tagline: 'State prediction bridges timesteps when anchor signals drop out or become unavailable.',
+    description: 'When obstacles block line-of-sight and reduce available measurements below the minimum required for a trilateration fix, a kinematic constant-velocity Kalman filter propagates state and error covariance to provide continuous, smooth trajectory estimates across dropouts.',
     technicalDetails: [
-      'Constant-velocity & constant-acceleration state propagation models',
-      'Adaptive error covariance matrices auto-expand during measurement outages',
-      'Zero trajectory stutter: seamless handoffs between anchor coverage cells'
+      'Constant-velocity state propagation model with recursive Kalman measurement updates',
+      'Predictive state projection maintains trajectory continuity across signal dropouts',
+      'Error covariance Q and measurement noise R tuned to simulation channel parameters'
     ],
-    equation: 'x̂_k|k-1 = F_k x̂_k-1|k-1 + B_k u_k'
+    equation: 'x̂_k|k-1 = F_k x̂_k-1|k-1, P_k|k-1 = F_k P_k-1|k-1 F_k^T + Q_k'
   },
   {
     id: 'jacobian-dop',
-    title: 'Jacobian GDOP & Matrix Health Diagnostics',
+    title: 'Jacobian Matrix Health & GDOP Analysis',
     category: 'Mathematical Rigor',
     icon: Grid3X3,
-    metric: '< 15',
-    metricLabel: 'Singularity Guard Condition κ',
+    metric: 'κ(J)',
+    metricLabel: 'Condition Number Check',
     tagline: 'Continuous condition number monitoring detects collinear anchor geometry before inversion fails.',
-    description: 'Narrow corridors frequently force anchors into collinear arrangements, producing singular matrices that crash blind matrix inversions. Locentra continuously evaluates the condition number κ of the Jacobian and dynamically injects ridge regularization when GDOP deteriorates.',
+    description: 'Narrow corridors frequently force anchors into collinear arrangements, producing singular matrices that crash blind matrix inversions. Locentra continuously evaluates the condition number κ of the Jacobian and investigates solver degradation in ill-conditioned geometries.',
     technicalDetails: [
-      'Real-time condition number κ(J) = σ_max / σ_min calculated per solve cycle',
-      'Automatic Tikhonov ridge regularization engaged when κ exceeds warning thresholds',
-      'Geometric Dilution of Precision (GDOP) confidence ellipsoids output with every coordinate'
+      'Jacobian condition number κ(J) = σ_max / σ_min evaluated per solve cycle',
+      'Identifies near-collinear and sparse anchor layouts that degrade solver accuracy',
+      'Geometric Dilution of Precision (GDOP) diagnostics computed alongside coordinate fixes'
     ],
-    equation: 'κ(J) = ||J|| · ||J⁺||, J_reg = (J^T J + λI)⁻¹ J^T'
+    equation: 'κ(J) = ||J|| · ||J⁺||, GDOP = sqrt(trace((H^T H)⁻¹))'
   },
   {
     id: 'zero-leakage',
-    title: 'Zero-Leakage Benchmark Pipeline',
+    title: 'Controlled Synthetic Benchmark Testbed',
     category: 'Empirical Rigor',
     icon: Target,
-    metric: '< 0.28m',
-    metricLabel: 'Multipath RMSE on Unseen Sites',
-    tagline: 'Laser-ground-truth spatial isolation guarantees models generalize to unseen industrial sites.',
-    description: 'Too many positioning engines overfit by training and evaluating on the same floor layout. Locentra isolates facilities completely: algorithms calibrated in Hall A are evaluated strictly on Hall B against sub-millimeter Leica laser trackers, proving genuine sub-meter precision in novel geometry.',
+    metric: 'Parametric',
+    metricLabel: 'Reproducible Testbed',
+    tagline: 'Controlled random seeds and parametric scenarios evaluate algorithms under identical conditions.',
+    description: 'Locentra tests solvers under controlled, reproducible conditions. Every synthetic scenario documents exact room boundaries, anchor coordinates, noise standard deviation, dropout probability, and random seeds to ensure benchmark transparency.',
     technicalDetails: [
-      'Rigorous spatial isolation between training calibration facilities and test spaces',
-      'Ground-truth validated with sub-millimeter industrial Leica laser trackers',
-      'Verifiable CDF percentile plots: P50 < 0.16m, P95 < 0.42m across complex multipath'
+      'Documented random seeds and deterministic trajectory generators for reproducibility',
+      'Multi-algorithm comparison on identical synthetic observations (NLS vs Huber vs Kalman)',
+      'Empirical error metrics: RMSE, mean error, median error, P95 error, and valid-estimate rate'
     ],
-    equation: 'CDF(e) = P(Error ≤ e), Spatial Split: D_train ∩ D_test = ∅'
+    equation: 'RMSE = sqrt(1/N Σ ||p_est - p_true||²), Seed = S'
   },
   {
     id: 'protocol-agnostic',
-    title: 'Universal Protocol Agnosticism',
-    category: 'Deployment Architecture',
+    title: 'Modular Range Tuple Architecture',
+    category: 'System Architecture',
     icon: Layers,
-    metric: '100%',
-    metricLabel: 'Hardware Vendor Neutral',
-    tagline: 'Drop-in algorithmic intelligence for UWB, ToF, BLE RSSI, and Chirp Spread Spectrum.',
-    description: 'Avoid costly vendor lock-in. Locentra’s positioning solver operates at the algorithmic layer, ingesting raw distance and timestamp tuples from any standard beacon or transceiver hardware. Upgrade positioning accuracy without replacing physical infrastructure.',
+    metric: 'Modular',
+    metricLabel: 'Algorithmic Layer',
+    tagline: 'Operates on standard distance-timestamp tuples, decoupling solver math from physical sensors.',
+    description: 'Locentra’s positioning solvers operate at the algorithmic layer, ingesting (anchor_id, measured_range, timestamp) tuples. This modular structure allows identical numerical solvers to be tested on synthetic simulation data today and real physical hardware in future research phases.',
     technicalDetails: [
-      'Supports Decawave / Qorvo DW1000/DW3000 UWB, BLE Channel Sounding, and Semtech CSS',
-      'Zero proprietary hardware requirements: run on commercial off-the-shelf anchors',
-      'Integrate via high-speed WebSockets, gRPC, REST, or lightweight embedded C++ library'
+      'Standardized range measurement interface compatible with UWB, BLE, or ultrasound models',
+      'Clean separation between synthetic measurement generation and numerical positioning engine',
+      'Extensible schema ready for physical sensor stream integration in future releases'
     ]
   },
   {
     id: 'realtime-throughput',
-    title: 'Sub-1.5ms Real-Time Engine',
-    category: 'High Performance',
+    title: 'Python Numerical Optimization Engine',
+    category: 'Computation Engine',
     icon: Zap,
-    metric: '714 Hz',
-    metricLabel: 'Solver Processing Frequency',
-    tagline: 'Microsecond-scale matrix inversion optimized for high-velocity robotic fleets and AMRs.',
-    description: 'High-speed autonomous mobile robots (AMRs) navigating at 3+ m/s cannot tolerate 100ms positioning lags. Locentra’s SIMD-vectorized solver delivers up to 714 Hz real-time coordinate updates, providing the instantaneous feedback required for active safety interlocks.',
+    metric: 'FastAPI',
+    metricLabel: 'Python / SciPy Backend',
+    tagline: 'NumPy-vectorized non-linear least squares solvers designed for rapid research iteration.',
+    description: 'Built with Python 3.11+, FastAPI, and SciPy optimization libraries. Solvers compute position fixes in milliseconds per epoch, enabling researchers to run extensive Monte Carlo parameter sweeps and test positioning resilience under hundreds of failure scenarios.',
     technicalDetails: [
-      '1.4ms deterministic solve latency under maximum multi-tag concurrency',
-      'SIMD vectorization and cache-aligned memory structures for edge CPU execution',
-      'Supports simultaneous tracking of 500+ dynamic assets per single edge node'
+      'SciPy least-squares optimization using Levenberg-Marquardt and trust-region reflective methods',
+      'Fast REST API endpoints (/api/v1/simulations/run and /api/v1/simulations/compare)',
+      'Batch evaluation and CDF generation across multi-point target trajectories'
     ],
-    equation: 'Latency_p99 < 1.8ms @ 700+ solves/sec'
+    equation: 'p* = argmin_p Σ ρ( ||p - a_i|| - d_i )'
   }
 ];
 
@@ -135,7 +135,7 @@ export const UniquenessSection: React.FC<{ onLaunchEngine?: () => void }> = ({ o
         <div className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F8FDE8] border border-[#D9F56F] text-[11px] font-mono text-[#232124] font-bold mb-4">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>ALGORITHMIC SUPERPOWERS</span>
+            <span>ALGORITHMIC PLATFORM ARCHITECTURE</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15]">
@@ -143,7 +143,7 @@ export const UniquenessSection: React.FC<{ onLaunchEngine?: () => void }> = ({ o
           </h2>
 
           <p className="mt-4 text-sm sm:text-base text-[#52525B] leading-relaxed">
-            Rather than generic wireless estimations, Locentra is built on deep mathematical resilience: robust loss formulations, continuous kinematic covariance propagation, and strict matrix health guards.
+            Rather than black-box approximations, Locentra investigates transparent mathematical methods: robust Huber loss formulations, kinematic state propagation, and matrix health diagnostics under controlled degradation.
           </p>
         </div>
 

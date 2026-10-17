@@ -45,20 +45,17 @@ describe('Locentra Enterprise Landing Page', () => {
     render(<LandingPageView />);
     
     // Hero headline (right side)
-    expect(screen.getByText(/Sub-Meter Indoor Intelligence/i)).toBeInTheDocument();
-    expect(screen.getByText(/Where GPS Dies/i)).toBeInTheDocument();
-    const nlosMatches = screen.getAllByText(/NLOS resilience/i);
-    expect(nlosMatches.length).toBeGreaterThanOrEqual(1);
-    const outlierMatches = screen.getAllByText(/real-time outlier suppression/i);
-    expect(outlierMatches.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/What Happens When Indoor Positioning Signals Fail\?/i)).toBeInTheDocument();
+    const problemMatches = screen.getAllByText(/interactive simulation platform/i);
+    expect(problemMatches.length).toBeGreaterThanOrEqual(1);
 
     // Metrics strip
-    expect(screen.getAllByText(/< 0\.28m/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/714 Hz/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/0-Leakage/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/~0\.28m/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Adaptive/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Controlled/i).length).toBeGreaterThanOrEqual(1);
 
     // Interactive 3D Sandbox label (left side)
-    expect(screen.getByText(/Interactive 3D Engine Sandbox/i)).toBeInTheDocument();
+    expect(screen.getByText(/Conceptual Demonstration HUD/i)).toBeInTheDocument();
   });
 
   it('renders Section 2 Architecture tabs and switches between modules', () => {
@@ -109,10 +106,10 @@ describe('Locentra Enterprise Landing Page', () => {
     expect(screen.getByText(/Engineered for Extremes/i)).toBeInTheDocument();
 
     // Feature cards - titles
-    expect(screen.getAllByText(/Adaptive Huber Outlier Clamping/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Kinematic Blackout Bridging/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Universal Protocol Agnosticism/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Sub-1\.5ms Real-Time Engine/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Adaptive Huber Outlier Loss/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Kinematic Kalman Motion Tracking/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Modular Range Tuple Architecture/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Python Numerical Optimization Engine/i).length).toBeGreaterThanOrEqual(1);
 
     // Bottom CTA
     expect(screen.getByRole('button', { name: /Launch Engine Dashboard/i })).toBeInTheDocument();
@@ -121,7 +118,7 @@ describe('Locentra Enterprise Landing Page', () => {
   it('renders Section 5 Contact form and triggers access submission', () => {
     render(<LandingPageView />);
 
-    expect(screen.getByText(/Deploy Locentra on Your/i)).toBeInTheDocument();
+    expect(screen.getByText(/Connect with the/i)).toBeInTheDocument();
     expect(screen.getByText('contact@locentra.ai')).toBeInTheDocument();
 
     const nameInput = screen.getByPlaceholderText(/Dr\. Eleanor Vance/i);
